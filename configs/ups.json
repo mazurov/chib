@@ -1,0 +1,17 @@
+{
+    "tuples2011": "data/chib2011rec14s20r1.root",
+    "tuples2012": "data/chib2012rec14s20.root",
+    "tree": "UpsilonAlg/Upsilon",
+    "nbins": 175,
+    "is_unbinned": false,
+    "binning_default": [8.5, 11, 175],
+    "cut": {
+        "m": [8.5, 12],
+        "dll_min":[0.0, null],
+        "c2_dtf":[0, 4],
+        "y":[2, 4.5],
+        "(Ups_l0tos & 2)": 2
+        ,"(Ups_l1tos & 2)": 2
+        ,"(Ups_l2tos & 2)": 2        
+    }
+}

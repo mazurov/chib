@@ -1,0 +1,29 @@
+{
+    "tuples2011": "data/chib2011rec14s20r1.root",
+    "tuples2012": "data/chib2012rec14s20.root",
+    "is_unbinned": false,
+    "has_splot": false,
+
+    "binning_default" : [0.31, 1.43, 56],
+    "binning_default1" : [0.6, 1.43, 56],
+    "polynom_order": [[12.1, 5], [18.1, 3], [100, 2]],
+
+    "chib3p_min_pt_ups": 10,
+    "fixed_means1": [4.3363e-01,  8.0179e-01,  1.0905e+00],
+    "fixed_means2": [4.28e-01,  7.86e-01,  null],
+    "fixed_means3": [4.315e-01,  7.938e-01,  1.0696],
+    "fixed_means": [4.31e-01,  7.96e-01, 1.04],
+    "cut": {
+         "dm_1s": [null, 0.2]
+        , "pt_ups": [6, null]
+        , "pt_g": [0.6, null]
+        , "lv01": [0, null]
+        , "cl_g": [0.01, null]
+        , "c2_dtf": [0, 4]
+        , "dll_min": [0, null]
+        , "y":[2, 4.5]
+        ,"(Ups_l0tos & 2)": 2
+        ,"(Ups_l1tos & 2)": 2
+        ,"(Ups_l2tos & 2)": 2
+    }
+}

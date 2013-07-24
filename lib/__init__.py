@@ -1,0 +1,1 @@
+from AnalysisPython import LHCbStyle
