@@ -7,39 +7,40 @@ from IPython import embed as shell  # noqa
 
 
 class DB(object):
-    def __init__(self, chib="chib1s_massg", ups="ups", mc="mc"):
+    def __init__(self, chib="chib1s", ups="ups", mc="mc_1s", iups=1):
         self.chib_path = "data/%s.db" % chib if chib else None
         self.ups_path = "data/%s.db" % ups if ups else None
         self.mc_path = "data/%s.db" % mc if mc else None
+        self.iups = iups
 
         self.chib = shelve.open(self.chib_path, "r") if chib else None
         self.ups = shelve.open(self.ups_path, "r") if ups else None
         self.mc = shelve.open(self.mc_path, "r") if mc else None
 
-    def eff(self, bin, np, nb=None):
-        if (not bin in self.mc["fits"]) or (not bin in self.mc["u1s"]):
+    def eff(self, bin, np, nb=None, ns=1):
+        if (not bin in self.mc["fits"]) or (not bin in self.mc["u%ds" % ns]):
             return None
 
         chib = self.mc["fits"][bin]
-        u1s = self.mc["u1s"][bin]
+        us = self.mc["u%ds" % ns][bin]
 
         keys = ("cb1%d" % np, "cb2%d" % np)
         if nb:
             cb = VE(str(chib[keys[nb - 1]]["N"]))
-            ups = u1s[keys[nb - 1]]
+            ups = us[keys[nb - 1]]
             return cb / ups
         else:
             values = []
             for k in keys:
                 cb = VE(str(chib[k]["N"]))
-                ups = u1s[k]
+                ups = us[k]
                 values.append(cb / ups)
             return utils.new_ve(values[0], values[1])
 
     def frac(self, year, bin, np, ns=1):
         n_chib = self.nchib(year, bin, np)
         n_ups = self.nups(year, bin, ns)
-        e = self.eff(bin=bin, np=np)
+        e = self.eff(bin=bin, np=np, ns=ns)
         return (n_chib / e) / n_ups
 
     def nchib(self, year, bin, np):
@@ -88,3 +89,6 @@ class DB(object):
 
     def fit(self, year, bin):
         return self.chib[year][bin]
+
+    def upsfit(self, year, bin):
+        return self.ups[year][bin]

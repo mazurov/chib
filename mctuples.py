@@ -10,7 +10,7 @@ __version__ = " Version $$"
 from Bender.MainMC import *
 from GaudiKernel.SystemOfUnits import GeV
 import BenderTools.TisTosMC
-# from IPython import embed as shell
+from IPython import embed as shell
 # =============================================================================
 # Simple class to look for Chi_b-peak
 #  @author Vanya BELYAEV ibelyaev@physics.syr.edu
@@ -87,19 +87,41 @@ class ChibMC(AlgoMC):
         real_chib_name = "chi_b{nb}({np}P)".format(nb=self.nb, np=self.np)
         mc_chib_name = "chi_b{nb}(1P)".format(nb=self.nb)
 
-        cb = self.mcselect('chib_ups1s',
-            '%s ->  ( Upsilon(1S) => mu+ mu- )  gamma' % mc_chib_name)
-        cb_y = self.mcselect('chib_ups1s_y',
-            '%s ->  ^( Upsilon(1S) => mu+ mu- )  gamma' % mc_chib_name)
-        cb_g = self.mcselect('chib_ups1s_g',
-            '%s ->  ( Upsilon(1S) => mu+ mu- )  ^gamma' % mc_chib_name)
+        cb_arr = []
+        cb_y_arr = []
+        cb_g_arr = []
 
-        if cb.empty() or cb_y.empty() or cb_g.empty():
-            return self.Warning('No true MC-decays are found', SUCCESS)
+        for i in range(3):
+            cb = self.mcselect('chib_ups%ds' % (i + 1),
+                               '%s ->  ( Upsilon(%dS) => mu+ mu- )  gamma' %
+                              (mc_chib_name, i+1))
+            cb_arr.append(cb)
 
-        mc_cb = NONE if cb.empty() else MCTRUTH(cb, self.mcTruth())
-        mc_cb_y = NONE if cb_y.empty() else MCTRUTH(cb_y, self.mcTruth())
-        mc_cb_g = NONE if cb_g.empty() else MCTRUTH(cb_g, self.mcTruth())
+            cb_y = self.mcselect('chib_ups%ds_y' % (i + 1),
+                                 '%s ->  ^( Upsilon(%dS) => mu+ mu- )  gamma' %
+                                (mc_chib_name, i+1))
+            cb_y_arr.append(cb_y)
+
+            cb_g = self.mcselect('chib_ups%ds_g' % (i + 1),
+                                 '%s ->  ( Upsilon(%dS) => mu+ mu- )  ^gamma' %
+                                (mc_chib_name, i+1))
+            cb_g_arr.append(cb_g)
+
+        # if cb.empty() or cb_y.empty() or cb_g.empty():
+        #     return self.Warning('No true MC-decays are found', SUCCESS)
+
+        mc_cb_arr = []
+        mc_cb_y_arr = []
+        mc_cb_g_arr = []
+        for i in range(3):
+            mc_cb = NONE if cb_arr[i].empty() else MCTRUTH(cb_arr[i], self.mcTruth())
+            mc_cb_arr.append(mc_cb)
+
+            mc_cb_y = NONE if cb_y_arr[i].empty() else MCTRUTH(cb_y_arr[i], self.mcTruth())
+            mc_cb_y_arr.append(mc_cb_y)
+
+            mc_cb_g = NONE if cb_g_arr[i].empty() else MCTRUTH(cb_g_arr[i], self.mcTruth())
+            mc_cb_g_arr.append(mc_cb_g)
 
         # book n-=tuple
         tup = self.nTuple('Chib')
@@ -136,13 +158,42 @@ class ChibMC(AlgoMC):
                 continue
 
             pt_ups = PT(ups) / GeV
+
+            if pt_ups < 6:
+                continue
+
             pt_g = PT(gam) / GeV
+
+            if pt_g < 0.6:
+                continue
+
+            probnn_mu1 = PROBNNmu(mu1)
+            probnn_mu2 = PROBNNmu(mu2)
+
+            if min(probnn_mu1, probnn_mu2) < 0.4:
+                continue
+
             y_ups = Y(ups)
             c2_dtf = chi2_dtf(ups)
+
+            if c2_dtf >4:
+                continue
+
             lv01 = LV02(chib)
+
+            if lv01 < 0:
+                continue
+
             dll_min = minDLLmu(ups)
 
+            if dll_min < 0:
+                continue
+
             tup.column('dm', dm)
+            tup.column('dmplusm1s', dm+9.46030)
+            tup.column('dmplusm2s', dm+10.02326)
+            tup.column('dmplusm3s', dm+10.3552)
+
             tup.column('m', M1(chib) / GeV)
             tup.column('pt_ups', pt_ups)
             tup.column('pt_g', pt_g)
@@ -167,6 +218,10 @@ class ChibMC(AlgoMC):
             tup.column('pt_mu1', PT(mu1) / GeV)
             tup.column('pt_mu2', PT(mu2) / GeV)
 
+            tup.column('probnn_mu1', probnn_mu1)
+            tup.column('probnn_mu2', probnn_mu1)
+
+
             tup.column('dm_1s', dm_1s(ups) / GeV)
             tup.column('dm_2s', dm_2s(ups) / GeV)
             tup.column('dm_3s', dm_3s(ups) / GeV)
@@ -188,25 +243,40 @@ class ChibMC(AlgoMC):
             # -----------------------------------------------------------------
             # MC
             # -----------------------------------------------------------------
-            tup.column('true_cb_ups1s', mc_cb(chib))
-            tup.column('true_cb_ups1s_y', mc_cb_y(ups))
-            tup.column('true_cb_ups1s_g', mc_cb_g(gam))
+            for i in range(3):
+                tup.column('true_cb_ups%ds' % (i + 1), mc_cb_arr[i](chib))
+                tup.column('true_cb_ups%ds_y' % (i + 1), mc_cb_y_arr[i](ups))
+                tup.column('true_cb_ups%ds_g' % (i + 1), mc_cb_g_arr[i](gam))
 
-            tup.column('mc_cb_y_e', -1 if cb_y.empty() else MCE(cb_y(0)) / GeV)
-            tup.column('mc_cb_g_e', -1 if cb_g.empty() else MCE(cb_g(0)) / GeV)
+                cb_y = cb_y_arr[i]
+                cb_g = cb_g_arr[i]
+                # shell()
+                tup.column('mc_cb_ups%ds_y_e' % (i + 1),
+                           -1.0 if cb_y.empty() else MCE(cb_y(0)) / GeV)
 
-            tup.column('mc_cb_y_pt', -1 if cb_y.empty() else MCPT(cb_y(0)) / GeV)
-            tup.column('mc_cb_g_pt', -1 if cb_g.empty() else MCPT(cb_g(0)) / GeV)
+                tup.column('mc_cb_ups%ds_g_e' % (i + 1),
+                           -1.0 if cb_g.empty() else MCE(cb_g(0)) / GeV)
 
-            tup.column('mc_cb_y_px', -1 if cb_y.empty() else MCPX(cb_y(0)) / GeV)
-            tup.column('mc_cb_g_px', -1 if cb_g.empty() else MCPX(cb_g(0)) / GeV)
+                tup.column('mc_cb_ups%ds_y_pt' % (i + 1),
+                           -1.0 if cb_y.empty() else MCPT(cb_y(0)) / GeV)
+                tup.column('mc_cb_ups%ds_g_pt' % (i + 1),
+                           -1.0 if cb_g.empty() else MCPT(cb_g(0)) / GeV)
 
-            tup.column('mc_cb_y_py', -1 if cb_y.empty() else MCPY(cb_y(0)) / GeV)
-            tup.column('mc_cb_g_py', -1 if cb_g.empty() else MCPY(cb_g(0)) / GeV)
+                tup.column('mc_cb_ups%ds_y_px' % (i + 1),
+                           -1.0 if cb_y.empty() else MCPX(cb_y(0)) / GeV)
+                tup.column('mc_cb_ups%ds_g_px' % (i + 1),
+                           -1.0 if cb_g.empty() else MCPX(cb_g(0)) / GeV)
 
-            tup.column('mc_cb_y_pz', -1 if cb_y.empty() else MCPZ(cb_y(0)) / GeV)
-            tup.column('mc_cb_g_pz', -1 if cb_g.empty() else MCPZ(cb_g(0)) / GeV)
-            # -----------------------------------------------------------------
+                tup.column('mc_cb_ups%ds_y_py' % (i + 1),
+                           -1.0 if cb_y.empty() else MCPY(cb_y(0)) / GeV)
+                tup.column('mc_cb_ups%ds_g_py' % (i + 1),
+                           -1.0 if cb_g.empty() else MCPY(cb_g(0)) / GeV)
+
+                tup.column('mc_cb_ups%ds_y_pz' % (i + 1),
+                           -1.0 if cb_y.empty() else MCPZ(cb_y(0)) / GeV)
+                tup.column('mc_cb_ups%ds_g_pz' % (i + 1),
+                           -1.0 if cb_g.empty() else MCPZ(cb_g(0)) / GeV)
+                # -------------------------------------------------------------
             tup.column('nb', self.nb)
             tup.column('np', self.np)
             tup.write()
@@ -286,7 +356,13 @@ class UpsilonMC(AlgoMC):
                 continue
 
             pt_ups = PT(ups) / GeV
+            if pt_ups < 6:
+                continue
+
             c2_dtf = chi2_dtf(ups)
+            if pt_ups > 4:
+                continue
+
             y_ups = Y(ups)
             # =================================================================
             mu1 = ups.child(1)
@@ -294,6 +370,12 @@ class UpsilonMC(AlgoMC):
             if not (mu1 or mu2):
                 continue
             # =================================================================
+
+            probnn_mu1 = PROBNNmu(mu1)
+            probnn_mu2 = PROBNNmu(mu2)
+            if min(probnn_mu1, probnn_mu2) < 0.4:
+                continue
+
             # tup.column ( 'dm'     , dm           / GeV )
             tup.column('m', m)
             tup.column('pt_ups', pt_ups)
@@ -306,6 +388,10 @@ class UpsilonMC(AlgoMC):
             tup.column('p_mu2', P(mu2) / GeV)
             tup.column('pt_mu1', PT(mu1) / GeV)
             tup.column('pt_mu2', PT(mu2) / GeV)
+
+            tup.column('probnn_mu1', PROBNNmu(mu1))
+            tup.column('probnn_mu2', PROBNNmu(mu2))
+
 
             tup.column('dm_1s', dm_1s(ups) / GeV)
             tup.column('dm_2s', dm_2s(ups) / GeV)
@@ -550,8 +636,8 @@ def main():
         ]
     }
 
-    nb = 1
-    np = 1
+    nb = 2
+    np = 3
     chib_name = "chib%d(%dP)" % (nb, np)
 
     print t.green("Processing files for MC %s" % chib_name)
@@ -560,7 +646,7 @@ def main():
     configure([prefix + file for file in test_files[chib_name]],
               castor=True,
               params={"nb": nb, "np": np})
-    run(30000)
+    run(300)
 
 
 if '__main__' == __name__:

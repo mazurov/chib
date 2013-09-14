@@ -12,16 +12,16 @@ from collections import defaultdict
 
 
 def save(result):
-    db = shelve.open('data/mc_1s.db')
-    count = db.get("u1s", {})
+    db = shelve.open('data/mc_2s.db')
+    count = db.get("u2s", {})
 
     count.update(dict(result))
 
-    db["u1s"] = count
+    db["u2s"] = count
     db.close()
 
 t = Terminal()
-cfg = utils.json("configs/mcfits1s.json")
+cfg = utils.json("configs/mcfits2s.json")
 
 tuples = ROOT.TChain("UpsilonAlg/Upsilon")
 tuples.Add(cfg["tuples"])
@@ -29,7 +29,7 @@ tuples.Add(cfg["tuples"])
 basic_cut = utils.cut_expr(cfg["ucut"])
 print t.yellow("Basic cut:"), basic_cut
 
-db = shelve.open("data/mc_elist.db")
+db = shelve.open("data/mc_elist2s.db")
 mc_ulist = db.get("ulist", None)
 
 # if not mc_ulist:
@@ -42,14 +42,13 @@ db.close()
 tuples.SetEntryList(mc_ulist)
 
 
-binning = [(6, 8), (8, 10), (10, 12), (12, 14), (14, 18), (18, 30), (18, 22),
-           (22, 30)]
+binning = [(18, 22), (22, 30)]
 
 result = defaultdict(dict)
-for np in range(3):
+for ip in range(2):
     for nb in range(2):
-        cut = {"np": np + 1, "nb": nb + 1}
-        db_key = "cb%d%d" % (nb + 1, np + 1)
+        cut = {"np": ip + 2, "nb": nb + 1}
+        db_key = "cb%d%d" % (nb + 1, ip + 2)
         for bin in binning:
             cut["pt_ups"] = bin
             cut_expr = utils.cut_expr(cut)

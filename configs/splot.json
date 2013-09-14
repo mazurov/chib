@@ -1,0 +1,59 @@
+{
+    "mc": "data/mc11a_v2.root",
+    "parameters": [
+        {
+            "name": "dm",
+            "hist": [0.2, 1.5, 100]
+        },
+        {
+            "name": "pt_g",
+            "hist": [0.6, 6, 100]
+        },
+        {
+            "name": "pt_g_0_1",
+            "param": "pt_g",
+            "hist": [0.5, 1, 100]
+        },        
+        {
+         "name": "pt_ups",
+         "hist": [14, 35, 100]
+        },
+        {
+         "name": "pt_chib",
+         "hist": [0, 35, 100]
+        },
+        {
+         "name": "cl_g",
+         "hist": [0, 1, 100]
+        },
+        {
+        "name": "chi2_vx",
+        "hist": [-1, 10, 100]
+        },
+        {
+         "name": "c2_dtf",
+         "hist": [-1, 5, 100]
+        },
+        {
+         "name": "min(p_mu1,p_mu2)",
+         "hist": [0, 450, 100]
+        },
+        {
+         "name": "min(p_mu1,p_mu2)_low",
+         "param": "min(p_mu1,p_mu2)",
+         "hist": [0, 100, 80]
+        },    
+        {
+         "name": "min(pt_mu1,pt_mu2)",
+         "hist": [0, 25, 100]
+        },
+        {
+         "name": "dll_min",
+         "hist": [-1, 11, 100]
+        },
+        {
+         "name": "y",
+         "hist": [1.5, 5, 100]
+        }
+    ]
+}

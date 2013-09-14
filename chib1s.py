@@ -12,7 +12,8 @@ import shelve
 from ext.blessings import Terminal
 t = Terminal()
 
-db = db.DB()
+db = db.DB(mc="mc_1s")
+
 
 def user_labels(pt_ups1, pt_ups2):
     def _user_labels(self):
@@ -26,19 +27,24 @@ def user_labels(pt_ups1, pt_ups2):
     return _user_labels
 
 
-def save(fit):
+def save(fit, suffix="dm"):
     bin = tuple(fit.cut["pt_ups"])
-    db = shelve.open('data/chib1s_massg.db')
+    dbname = "chib1s" + ("_" + suffix if suffix else "")
+    db = shelve.open('data/%s.db' % dbname)
+
     year = db.get(fit.year, {})
     year[bin] = fit.model.params()
     db[fit.year] = year
+    print db[fit.year]
     db.close()
+
+    figname = fit.year + ("_" + suffix if suffix else "")
     canvas.SaveAs("figs/data/fits/f%s_%d_%s.pdf" %
-                  (fit.year, bin[0], str(bin[1])))
+                  (figname, bin[0], str(bin[1])))
 
 
 def _sfracs(bin):
-    db = shelve.open("data/mc.db", "r")
+    db = shelve.open("data/mc_1s.db", "r")
     tbin = tuple(bin)
     if tbin in db["fits"]:
         db_fits = db["fits"][tuple(tbin)]
@@ -51,7 +57,7 @@ def _sfracs(bin):
 
 cfg = utils.json("configs/chib1s.json")
 
-year = int(sys.argv[1])
+year = sys.argv[1]
 pt_ups1 = int(sys.argv[2])
 pt_ups2 = int(sys.argv[3]) if sys.argv[3] != '0' else None
 
@@ -59,10 +65,10 @@ cut = cfg["cut"]
 bin = (pt_ups1, pt_ups2)
 cut["pt_ups"] = bin
 
-cut["dm"] = [cfg["binning_default"][0], cfg["binning_default"][1]]
+cut["dmplusm1s"] = [cfg["binning_default"][0], cfg["binning_default"][1]]
 nbins = cfg["binning_default"][2]
 
-if pt_ups1 < 10:
+if pt_ups1 < 12:
     order = 5
 elif pt_ups1 < 14:
     order = 3
@@ -93,49 +99,43 @@ else:
 # sfracs=None
 
 has_3p = True if pt_ups1 >= 12 else False
+if year == "2011" and pt_ups1 == 12 and pt_ups2 == 14:
+    has_3p = False
 print t.yellow("Has chib(3P): "), has_3p
 
-
-tuples_file = cfg["tuples%d" % year]
 tuples = ROOT.TChain("ChibAlg/Chib")
-tuples.Add(tuples_file)
+if year == 'all':
+    tuples.Add(cfg["tuples2011"])
+    tuples.Add(cfg["tuples2012"])
+else:
+    tuples.Add(cfg["tuples%s" % year])
 
-canvas.SetTitle("%d-%s %d" % (pt_ups1, pt_ups2, year))
+canvas.SetTitle("%d-%s %s" % (pt_ups1, pt_ups2, year))
 
 # Width from database
 mc_width = []
 model = ChibModel(canvas=canvas,
-                  dm_begin=cut["dm"][0],
-                  dm_end=cut["dm"][1],
+                  dm_begin=cut["dmplusm1s"][0],
+                  dm_end=cut["dmplusm1s"][1],
                   nbins=nbins,
                   bgorder=order,
                   frac=frac,
                   sfracs=sfracs,
                   has_3p=has_3p)
 
-if cut["dm"][0] >= 0.6:
-    model.n1p.fix(0)
-    model.chib1p.mean1.setConstant(True)
-    model.chib1p.sigma1.setConstant(True)
+# if cut["dmplusm1s"][0] >= 0.6:
+#     model.n1p.fix(0)
+#     model.chib1p.mean1.setConstant(True)
+#     model.chib1p.sigma1.setConstant(True)
 
 if "fixed_means" in cfg:
-    # fix_means = (4.3150e-01, 7.9379e-01, 1.0692e+00)
-    # fix_means = (4.2993e-01, 8.0603e-01, 1.0907e+00)
-    fix_means = cfg["fixed_means"]
-
-    print t.yellow("Fix means to:"), str(fix_means)
-    if fix_means[0]:
-        model.chib1p.mean1.fix(fix_means[0])
-    if fix_means[1]:
-        model.chib2p.mean1.fix(fix_means[1])
-    if fix_means[2]:
-        model.chib3p.mean1.fix(fix_means[2])
+    model.chib1p.mean1.fix(cfg["fixed_means"])
 
 
 f = fit.Fit(model=model,
             tuples=tuples,
             cut=cut,
-            field="dm",
+            field="dmplusm1s",
             is_unbinned=cfg["is_unbinned"],
             nbins=nbins,
             has_splot=cfg["has_splot"])

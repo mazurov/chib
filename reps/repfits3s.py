@@ -4,8 +4,7 @@
 # ============================================================================
 from AnalysisPython.PyRoUts import VE
 # ============================================================================
-BINNING = [(6, 8), (8, 10), (10, 12), (12, 14), (14, 18), (18, 22), (22, 30),
-           (18, 30)]
+BINNING = [(27, 40)]
 # ============================================================================
 from lib import utils
 from lib import pdg
@@ -23,7 +22,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
                              file_extension="tex")
 # ============================================================================
 # Extract efficencies
-db = db.DB()
+db = db.DB(chib="chib3s", mc="mc_3s", iups=4)
 # ============================================================================
 alignment = "c" * (len(BINNING))
 # ============================================================================
@@ -32,16 +31,16 @@ for bin in BINNING:
     bins += " & %d --- %d" % bin
 # ============================================================================
 for year in ["2011", "2012"]:
-    N = ["", "", ""]
+    N = ["", ""]
     B = ""
-    mean = ["", "", ""]
-    dmb2b1 = ["", "", ""]
-    frac = ["", "", ""]
-    a = ["", "", ""]
-    n = ["", "", ""]
+    mean = ["", ""]
+    dmb2b1 = ["", ""]
+    frac = ["", ""]
+    a = ["", ""]
+    n = ["", ""]
     sigma = ""
     sigmab2b1 = ""
-    sfrac = ["", ""]
+    sfrac = [""]
 
     tau = ""
     phi = ["","","","",""]
@@ -50,45 +49,40 @@ for year in ["2011", "2012"]:
 
     for bin in BINNING:
         fit = db.fit(year, bin)
-        for ip in range(3):
-            key = "N%dP" % (ip + 1)
+        for ip in range(1):
+            key = "N%dP" % (ip + 3)
             if key in fit:
                 N[ip] += " & %s" % utils.latex_ve_pair(fit[key])
             else:
                 N[ip] += " & - "
 
-            key = "mean_b1_%dp" % (ip + 1)
+            key = "mean_b1_%dp" % (ip + 3)
             if key in fit:
                 mean[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])) * 1000)
             else:
                 mean[ip] += " & - "
 
-            key = "dmb2b1_%dp" % (ip + 1)
+            key = "dmb2b1_%dp" % (ip + 3)
             if key in fit:
                 dmb2b1[ip] += " & %s" % utils.latex_ve(
                     VE(str(fit[key])) * 1000)
             else:
                 dmb2b1[ip] += " & - "
-            if ip > 0:
-                key = "sfrac%dp1p" % (ip + 1)
-                if key in fit:
-                    sfrac[ip - 1] += " & %s" % utils.latex_ve_pair(fit[key])
-                else:
-                    sfrac[ip - 1] += " & - "
 
-            key = "frac%d" % (ip + 1)
+
+            key = "frac%d" % (ip + 3)
             if key in fit:
                 frac[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])))
             else:
                 frac[ip] += " & - "
 
-            key = "a%d" % (ip + 1)
+            key = "a%d" % (ip + 3)
             if key in fit:
                 a[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])))
             else:
                 a[ip] += " & - "
 
-            key = "n%d" % (ip + 1)
+            key = "n%d" % (ip + 3)
             if key in fit:
                 n[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])))
             else:
@@ -96,8 +90,7 @@ for year in ["2011", "2012"]:
 
 
 
-        sigma += " & %s" % utils.latex_ve(VE(str(fit["sigma_b1_1p"])) * 1000)
-        sigmab2b1 += " & %s" % utils.latex_ve(VE(str(fit["sdiffb2b1"])))
+        sigma += " & %s" % utils.latex_ve(VE(str(fit["sigma_b1_3p"])) * 1000)
         B += " & %s" % utils.latex_ve_pair(fit["B"])
 
         tau += " & %s" % utils.latex_ve_pair(fit["exp_tau"])
@@ -116,23 +109,20 @@ for year in ["2011", "2012"]:
         "bins": bins,
         "B": B,
         "sigma": sigma,
-        "sigmab2b1": sigmab2b1,
+        # "sigmab2b1": sigmab2b1,
         "chi2": chi2,
         "tau": tau,
     }
 
-    for ip in range(3):
-        context["N%d" % (ip + 1)] = N[ip]
-        context["B%d" % (ip + 1)] = B[ip]
-        context["mean%d" % (ip + 1)] = mean[ip]
-        context["dmb2b1_%d" % (ip + 1)] = dmb2b1[ip]
-        context["frac%d" % (ip + 1)] = frac[ip]
-        context["a%d" % (ip + 1)] = a[ip]
-        context["n%d" % (ip + 1)] = n[ip]
-
-        if ip > 0:
-            context["sfrac%dp1p" % (ip + 1)] = sfrac[ip - 1]
+    for ip in range(1):
+        context["N%d" % (ip+3)] = N[ip]
+        context["B%d" % (ip+3)] = B[ip]
+        context["mean%d" % (ip+3)] = mean[ip]
+        context["dmb2b1_%d" % (ip+3)] = dmb2b1[ip]
+        context["frac%d" % (ip+3)] = frac[ip]
+        context["a%d" % (ip+3)] = a[ip]
+        context["n%d" % (ip+3)] = n[ip]
 
     for iphi in range(5):
-        context["phi%d" % (iphi + 1)] = phi[iphi]        
-    print renderer.render_name("fit", context)
+        context["phi%d" % (iphi + 1)] = phi[iphi]
+    print renderer.render_name("fit3s", context)

@@ -12,13 +12,18 @@ from ext.blessings import Terminal
 t = Terminal()
 
 
-def save(fit):
+def save(fit, suffix=None):
     bin = tuple(fit.cut["pt_ups"])
-    db = shelve.open('data/ups.db')
+    db = shelve.open('data/ups_1cb.db')
     year = db.get(fit.year, {})
     year[bin] = fit.model.params()
     db[fit.year] = year
+    print(db[fit.year])
     db.close()
+
+    figname = fit.year + ("_" + suffix if suffix else "")
+    canvas.SaveAs("figs/data/ufits/f%s_%d_%s.pdf" %
+                  (figname, bin[0], str(bin[1])))
 
 
 cfg = utils.json("configs/ups.json")
@@ -44,6 +49,7 @@ model = UpsModel(canvas=canvas,
                  m1=cut["m"][0],
                  m2=cut["m"][1],
                  nbins=nbins,
+                 is_pull=cfg["is_pull"]
                  )
 # model.chib1p.sigma.fix(0.022)
 f = fit.Fit(model=model,

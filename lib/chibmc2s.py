@@ -11,57 +11,27 @@ from lib.model import AbstractModel
 from IPython import embed as shell  # noqa
 
 
-class Chib1P(object):
-
-    def __init__(self, dm):
-        dm_pdg = pdg.DM1S[0].value()
-        self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
-                                    dm_pdg - 0.05, dm_pdg + 0.05)
-
-        self.sigma = ROOT.RooRealVar("sigma", "sigma",
-                                     0.024,
-                                     0.024 - 0.015,
-                                     0.024 + 0.015)
-
-        self.nR = ROOT.RooRealVar("nr", "nr", 5 , 0, 100)
-        self.nR.setConstant(True)
-        self.alphaR = ROOT.RooRealVar(
-            "ar", "ar", -1.1, -5, 0) # -1.1
-        self.alphaR.setConstant(True)
-
-        self.nL = ROOT.RooRealVar("nl", "nl", 5, 0, 100)
-        self.nL.setConstant(True)
-        self.alphaL = ROOT.RooRealVar("al", "al", 1.1, 0, 5)  # -1.23
-        self.alphaL.setConstant(True)
-
-        # self.pdf = CrystalBallDS("cb", "cb", dm, self.mean,
-        #                          self.sigma, self.alphaL, self. nL,
-        #                          self.alphaR, self. nR)
-
-        self.pdf = ROOT.RooCBShape("cb", "cb", dm, self.mean,
-                                self.sigma, self.alphaR, self. nR)
-
 class Chib2P(object):
-
+ 
     def __init__(self, dm):
-        dm_pdg = pdg.DM1S[2].value()
+        dm_pdg = pdg.DM2S[2].value()
         self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
                                     dm_pdg-0.1, dm_pdg+0.1)
-
+ 
         self.sigma = ROOT.RooRealVar("sigma", "sigma",
-                                     0.045, 0.045 - 0.03, 0.045 + 0.03)
-
+                                     0.01, 0.01 - 0.009, 0.01 + 0.02)
+ 
         self.nR = ROOT.RooRealVar("nr", "nr", 5, 0, 10)
         self.nR.setConstant(True)
         self.alphaR = ROOT.RooRealVar(
             "ar", "ar", -1.1, -5, 0)
         self.alphaR.setConstant(True)
-
+ 
         self.nL = ROOT.RooRealVar("nl", "nl", 0, 0, 10)
         self.nL.setConstant(True)
         self.alphaL = ROOT.RooRealVar("al", "al", 1, 0, 5)  # 0.8
         self.alphaL.setConstant(True)
-
+ 
         #self.pdf = CrystalBallDS("cb", "cb", dm, self.mean,
         #                          self.sigma, self.alphaL, self. nL,
         #                          self.alphaR, self. nR)
@@ -72,12 +42,12 @@ class Chib2P(object):
 class Chib3P(object):
 
     def __init__(self, dm):
-        dm_pdg = pdg.DM1S[4].value()
+        dm_pdg = pdg.DM2S[4].value()
         self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
                                     dm_pdg-0.1, dm_pdg+0.1)
 
         self.sigma = ROOT.RooRealVar("sigma", "sigma",
-                                     0.045, 0.045 - 0.03, 0.045 + 0.03)
+                                     0.02,0.02 - 0.015, 0.02 + 0.015)
 
         self.n = ROOT.RooRealVar("n", "n", 5, 0, 20)
         self.n.setConstant(True)
@@ -92,22 +62,12 @@ class Chib3P(object):
 class Background(object):
     def __init__(self, dm, dm_begin, dm_end):
         self.phi1 = ROOT.RooRealVar("phi1", "phi1", 0, -3.1415, +3.1415)
-        self.phi2 = ROOT.RooRealVar("phi2", "phi2", 0, -3.1415, +3.1415)
-        self.phi3 = ROOT.RooRealVar("phi3", "phi3", 0, -3.1415, +3.1415)
-        # self.phi1.fix(0)
+
 
         self.tau = ROOT.RooRealVar("tau", "tau", -1.5, -100, 0)
-
+        
         self.pdf = ExpoPositive("bg", "bg", dm, self.tau, self.phi1,
             dm_begin, dm_end)
-        # self.pdf = ROOT.RooExponential("bg", "bg", dm, self.tau)
-
-        # self.pdf = PolyPositive("bg", "bg", dm, self.phi1,
-        #                         dm_begin, dm_end)
-        # self.c = ROOT.RooFit.RooConst(1)
-        # self.alist = ROOT.RooArgList()
-        # self.pdf = ROOT.RooPolynomial("bg","bg", dm, self.alist)
-
 
 class ChibMCModel(AbstractModel):
 
@@ -146,7 +106,7 @@ class ChibMCModel(AbstractModel):
         #frame.GetXaxis().SetTitle("m(#mu^{+}#mu^{-}#gamma) - "
         #                          "m(#mu^{+ }#mu^{-}) [GeV/c^{2}]")
         #self.candidates()
-
+        
     def draw_after(self):
         frame = self.frame
         frame.drawAfter("model_Norm[%s]_Comp[cb]" % self.xfield, "h_ds")

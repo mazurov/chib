@@ -7,13 +7,14 @@ NUMCPU = 2
 
 class AbstractModel(object):
     def __init__(self, canvas, x0, x1, xfield, x=None, nbins=100,
-                 user_labels=None):
+                 user_labels=None, is_pull=True):
         self.x0 = x0
         self.x1 = x1
         self.xfield = xfield
         self.x = x if x else ROOT.RooRealVar(xfield, xfield, x0, x0, x1)
         self.nbins = nbins
         self.canvas = canvas
+        self.is_pull = is_pull
 
         self.chi2 = -1
         self.fit = None
@@ -49,7 +50,7 @@ class AbstractModel(object):
         self.frame = self.x.frame()
         dataset.plotOn(self.frame, ROOT.RooFit.Binning(self.nbins))
         self.after_fit()
-    
+
     def after_fit(self):
         self._plot()
         self._eval_chi2()
@@ -67,7 +68,7 @@ class AbstractModel(object):
     def curves(self):
         assert False, "Curves don't implemented"
         pass
-    
+
     def draw_after(self):
         pass
 
@@ -77,55 +78,58 @@ class AbstractModel(object):
         self.curves()
         frame.drawAfter("model_Norm[%s]" % self.xfield, "h_ds")
         frame.drawAfter("model_Norm[%s]_Comp[bg]" % self.xfield, "h_ds")
-        self.draw_after()        
-        self.hpull = frame.pullHist("h_ds",
-                                    "model_Norm[%s]" % self.xfield
-                                    )
+        self.draw_after()
+
+        if self.is_pull:
+            self.hpull = frame.pullHist("h_ds",
+                                        "model_Norm[%s]" % self.xfield
+                                        )
+
+            frame_pull = self.x.frame(ROOT.RooFit.Title("Pull Distribution"))
+
+            frame_pull.SetMinimum(-5)
+            frame_pull.SetMaximum(5)
+            frame_pull.SetNdivisions(8, "y")
+            frame_pull.SetNdivisions(0, "x")
+            frame_pull.GetYaxis().SetLabelSize(0.1)
+            frame_pull.GetXaxis().SetTitle("")
+            frame_pull.addPlotable(self.hpull, "P")
+
+            self.canvas.Clear()
+            self.canvas.Divide(1, 2)
+
+            pad = self.canvas.cd(1)
+            pad.SetPad(0, 0.2, 1, 1)
+            frame.Draw()
+
+            pad = self.canvas.cd(2)
+            # pad.SetGridy(True)
+            pad.SetPad(0, 0, 1, 0.18)
+
+            xMin = frame_pull.GetXaxis().GetXmin()
+            xMax = frame_pull.GetXaxis().GetXmax()
+            self.hpull_uppLine = ROOT.TLine(xMin,  3, xMax,  3)
+            self.hpull_midLine = ROOT.TLine(xMin,  0, xMax,  0)
+            self.hpull_lowLine = ROOT.TLine(xMin, -3, xMax, -3)
+            self.hpull_uppLine.SetLineColor(ROOT.kBlue)
+            self.hpull_midLine.SetLineColor(ROOT.kRed)
+            self.hpull_lowLine.SetLineColor(ROOT.kBlue)
+            self.hpull_uppLine.SetLineWidth(2)
+            self.hpull_midLine.SetLineWidth(2)
+            self.hpull_lowLine.SetLineWidth(2)
+            # self.hpull_uppLine.SetLineStyle(ROOT.kDashed),
+            # self.hpull_lowLine.SetLineStyle(ROOT.kDashed),
 
 
-        frame_pull = self.x.frame(ROOT.RooFit.Title("Pull Distribution"))
+            frame_pull.Draw()
+            self.hpull_uppLine.Draw()
+            self.hpull_midLine.Draw()
+            self.hpull_lowLine.Draw()
 
-        frame_pull.SetMinimum(-5)
-        frame_pull.SetMaximum(5)
-        frame_pull.SetNdivisions(8, "y")
-        frame_pull.SetNdivisions(0, "x")
-        frame_pull.GetYaxis().SetLabelSize(0.1)
-        frame_pull.GetXaxis().SetTitle("")                                    
-        frame_pull.addPlotable(self.hpull, "P")
-
-        self.canvas.Clear()
-        self.canvas.Divide(1, 2)
-
-        pad = self.canvas.cd(1)
-        pad.SetPad(0, 0.2, 1, 1)
-        frame.Draw()
-
-        pad = self.canvas.cd(2)
-        # pad.SetGridy(True)
-        pad.SetPad(0, 0, 1, 0.18)
-
-        xMin = frame_pull.GetXaxis().GetXmin()
-        xMax = frame_pull.GetXaxis().GetXmax()
-        self.hpull_uppLine = ROOT.TLine(xMin,  3, xMax,  3)
-        self.hpull_midLine = ROOT.TLine(xMin,  0, xMax,  0)
-        self.hpull_lowLine = ROOT.TLine(xMin, -3, xMax, -3)
-        self.hpull_uppLine.SetLineColor(ROOT.kBlue)
-        self.hpull_midLine.SetLineColor(ROOT.kRed)
-        self.hpull_lowLine.SetLineColor(ROOT.kBlue)
-        self.hpull_uppLine.SetLineWidth(2)
-        self.hpull_midLine.SetLineWidth(2)
-        self.hpull_lowLine.SetLineWidth(2)
-        # self.hpull_uppLine.SetLineStyle(ROOT.kDashed),
-        # self.hpull_lowLine.SetLineStyle(ROOT.kDashed),
-
-
-        frame_pull.Draw()
-        self.hpull_uppLine.Draw()
-        self.hpull_midLine.Draw()
-        self.hpull_lowLine.Draw()
-
-        self.frame_pull = frame_pull
-        self.canvas.cd()
+            self.frame_pull = frame_pull
+            self.canvas.cd()
+        else:  # no pull
+            frame.Draw()
 
     def _eval_chi2(self):
         self.chi2 = self.frame.chiSquare("model_Norm[%s]" % self.xfield,
@@ -153,7 +157,7 @@ class AbstractModel(object):
 
     def save_image(self, path):
         self.canvas.SaveAs(path)
-    
+
 
     def __str__(self):
         result = str(self.fit)+"\n"

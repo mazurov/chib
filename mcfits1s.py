@@ -29,9 +29,10 @@ def user_labels(pt_ups1, pt_ups2):
         self.user_label.Draw()
     return _user_labels
 
+# mc_mass - pt_g > 1.3
 
 def save(result):
-    db = shelve.open('data/mc_mass.db')
+    db = shelve.open('data/mc_1s.db')
     fits = db.get("fits", {})
 
     fits.update(dict(result))
@@ -67,11 +68,12 @@ def graphs(result):
 
 cfg = utils.json("configs/mcfits1s.json")
 
-# binning = [(6, 8), (8, 10), (10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30)]
+# binning = [(6,   8), (8, 10), (10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30), (14, None)]
+# binning = [(10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30)]
 # binning = [(6, 8)]
 # binning = [(22, 30)]
 # binning = [(6, 8), (8,10)]
-binning = [(14, None)]
+binning = [(18, None)]
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])

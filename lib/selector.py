@@ -30,8 +30,10 @@ class UniversalSelector(SelectorWithCuts):
                                   for name in columns])
 
         aset = ROOT.RooArgSet("args")
+
         for c in self.columns:
             aset.add(c)
+
         self.varset = ROOT.RooArgSet(aset)
         self.data = ROOT.RooDataSet("ds", "ds", self.varset)
 
@@ -46,19 +48,19 @@ class UniversalSelector(SelectorWithCuts):
         if self.GetEntry(entry) <= 0:
             return 0
 
-        if not self.progress:
-            self.total = self.fChain.Draw("m", self.selection)
-            logger.info('TChain entries: %d' % self.total)
-            self.progress = ProgressBar(
-                0,
-                self.total,
-                80,
-                mode='fixed'
-            )
+        # if not self.progress:
+        #     self.total = self.fChain.Draw("m", self.selection)
+        #     logger.info('TChain entries: %d' % self.total)
+        #     self.progress = ProgressBar(
+        #         0,
+        #         self.total,
+        #         80,
+        #         mode='fixed'
+        #     )
 
-        if 0 == self.events % 1000:
-            self.progress.increment_amount(1000)
-            print self.progress, '\r',
+        # if 0 == self.events % 1000:
+        #     self.progress.increment_amount(1000)
+        #     print self.progress, '\r',
 
         self.events += 1
 

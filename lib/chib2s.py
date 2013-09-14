@@ -43,76 +43,14 @@ class Background(object):
         self.pdf = self.exp_pdf
 
 
-class Chib1P(object):
-
-    def __init__(self, dm, frac, sigma=None):
-        m_pdg = pdg.CHIB11P.value()
-        self.mean1 = ROOT.RooRealVar("mean_b1_1p", "mean_b1_1p", m_pdg,
-                                     m_pdg - 0.05, m_pdg + 0.05)
-        # self.mean1.setConstant(True)
-        diff = pdg.CHIB21P.value() - pdg.CHIB11P.value()
-        self.dmb2b1 = ROOT.RooRealVar("dmb2b1_1p", "dmb2b1_1p", diff)
-        self.dmb2b1.setConstant(True)
-
-        alistb2b1 = ROOT.RooArgList(self.mean1, self.dmb2b1)
-        self.mean2 = ROOT.RooFormulaVar("mean_b2_1p", "mean_b2_1p",
-                                        "%s+%s" % (self.mean1.GetName(),
-                                                   self.dmb2b1.GetName()
-                                                   ),
-                                        alistb2b1)
-
-        self.sigma1 = ROOT.RooRealVar("sigma_b1_1p", "sigma_b1_1p",
-                                      0.024,
-                                      0.024 - 0.01,
-                                      0.024 + 0.01)
-        if sigma:
-            self.sigma1.fix(sigma)
-
-        self.sdiffb2b1 = ROOT.RooRealVar("sdiffb2b1", "sdiffb2b1",
-                                         1.05,
-                                         1,
-                                         1.08)
-        self.sdiffb2b1.setConstant(True)
-        alist_s_b2b1 = ROOT.RooArgList(self.sigma1, self.sdiffb2b1)
-        self.sigma2 = ROOT.RooFormulaVar("sigma_b2_1p", "sigma_b2_1p",
-                                         "%s*%s" % (self.sigma1.GetName(),
-                                                    self.sdiffb2b1.GetName()
-                                                    ),
-                                         alist_s_b2b1)
-
-        self.n = ROOT.RooRealVar("n1", "n1", 5, 1, 5)
-        self.n.setConstant(True)
-        self.a = ROOT.RooRealVar("a1", "a1", -1.1, -5, 0)
-        self.a.setConstant(True)
-
-        self.pdf1 = ROOT.RooCBShape("cb1_1", "cb1_1", dm, self.mean1,
-                                    self.sigma1, self.a, self.n)
-        self.pdf2 = ROOT.RooCBShape("cb2_1", "cb2_1", dm, self.mean2,
-                                    self.sigma2, self.a, self.n)
-
-        self.frac = ROOT.RooRealVar("frac1", "frac1", frac, 0, 1)
-        self.frac.setConstant(True)
-        self.pdf = ROOT.RooAddPdf("cb1", "cb1", self.pdf1, self.pdf2,
-                                  self.frac)
-
-
 class Chib2P(object):
 
-    def __init__(self, dm, mean_1p, sigma1, sfrac, frac):
-        # dm_pdg = pdg.DM1S[2].value()
+    def __init__(self, dm, frac, sigma=None):
+        dm_pdg = pdg.DM2S[2].value()
+        self.mean1 = ROOT.RooRealVar("mean_b1_2p", "mean_b1_2p", dm_pdg,
+                                     dm_pdg - 0.1, dm_pdg + 0.1)
 
-        diff = pdg.CHIB12P - pdg.CHIB11P
-        self.dm1p = ROOT.RooRealVar("dm_b12p_b11p", "dm_b12p_b11p",
-                                    diff, diff - 0.05, diff + 0.05)
-        self.dm1p.setConstant(True)
-
-        alist = ROOT.RooArgList(mean_1p, self.dm1p)
-        self.mean1 = ROOT.RooFormulaVar("mean_b1_2p", "mean_b1_2p",
-                                        "%s+%s" %
-                                        (mean_1p.GetName(),
-                                         self.dm1p.GetName()), alist)
-
-        diff = pdg.CHIB22P.value() - pdg.CHIB12P.value()
+        diff = pdg.DM2S[3].value() - pdg.DM2S[2].value()
         self.dmb2b1 = ROOT.RooRealVar("dmb2b1_2p", "dmb2b1_2p", diff)
         self.dmb2b1.setConstant(True)
 
@@ -123,19 +61,12 @@ class Chib2P(object):
                                                    ),
                                         alistb2b1)
 
-        if sfrac:
-            self.sfrac = ROOT.RooRealVar("sfrac2p1p", "sfrac2p1p", 1.6, 1, 3)
-            self.sfrac.fix(sfrac)
-
-            alist = ROOT.RooArgList(self.sfrac, sigma1)
-            self.sigma = ROOT.RooFormulaVar("sigma2", "sigma2",
-                                            "%s*%s" % (self.sfrac.GetName(),
-                                                       sigma1.GetName()), alist)
-        else:
-            self.sigma = ROOT.RooRealVar("sigma_b1_2p", "sigma_b1_2p",
-                                         0.03,
-                                         0.03 - 0.02,
-                                         0.03 + 0.02)
+        self.sigma = ROOT.RooRealVar("sigma_b1_2p", "sigma_b1_2p",
+                                     0.01,
+                                     0.01 - 0.005,
+                                     0.01 + 0.01)
+        if sigma:
+            self.sigma.fix(sigma)
 
         self.n = ROOT.RooRealVar("n2", "n2", 5, 1, 5)
         self.a = ROOT.RooRealVar("a2", "a2", -1.1, -3.5, 0)  # -1.23
@@ -165,20 +96,12 @@ class Chib2P(object):
 
 class Chib3P(object):
 
-    def __init__(self, dm, mean_1p, sigma1, sfrac, frac):
+    def __init__(self, dm, sigma2, sfrac, frac):
+        dm_pdg = pdg.DM2S[4].value()
+        self.mean1 = ROOT.RooRealVar("mean_b1_3p", "mean_b1_3p", dm_pdg,
+                                     dm_pdg - 0.1, dm_pdg + 0.1)
 
-        diff = pdg.CHIB13P - pdg.CHIB11P
-        self.dm1p = ROOT.RooRealVar("dm_b13p_b11p", "dm_b13p_b11p",
-                                    diff, diff - 0.05, diff + 0.05)
-        self.dm1p.setConstant(True)
-
-        alist = ROOT.RooArgList(mean_1p, self.dm1p)
-        self.mean1 = ROOT.RooFormulaVar("mean_b1_3p", "mean_b1_3p",
-                                        "%s+%s" %
-                                        (mean_1p.GetName(),
-                                         self.dm1p.GetName()), alist)
-
-        diff = pdg.CHIB23P.value() - pdg.CHIB13P.value()
+        diff = pdg.DM2S[5].value() - pdg.DM2S[4].value()
         self.dmb2b1 = ROOT.RooRealVar("dmb2b1_3p", "dmb2b1_3p", diff)
         self.dmb2b1.setConstant(True)
 
@@ -190,18 +113,18 @@ class Chib3P(object):
                                         alistb2b1)
 
         if sfrac:
-            self.sfrac = ROOT.RooRealVar("sfrac3p1p", "sfrac3p1p", 2, 1, 3)
+            self.sfrac = ROOT.RooRealVar("sfrac3p2p", "sfrac3p2p", 2, 1, 3)
             if sfrac:
                 self.sfrac.fix(sfrac)
-            alist = ROOT.RooArgList(self.sfrac, sigma1)
-            self.sigma = ROOT.RooFormulaVar("sigma3", "sigma3",
+            alist = ROOT.RooArgList(self.sfrac, sigma2)
+            self.sigma = ROOT.RooFormulaVar("sigma_b1_3p", "sigma_b1_3p",
                                             "%s*%s" % (self.sfrac.GetName(),
-                                                       sigma1.GetName()), alist)
+                                                       sigma2.GetName()), alist)
         else:
             self.sigma = ROOT.RooRealVar("sigma_b1_3p", "sigma_b1_3p",
-                                         0.04,
-                                         0.05 - 0.04,
-                                         0.05 + 0.04)
+                                         0.02,
+                                         0.02 - 0.015,
+                                         0.02 + 0.015)
 
         self.n = ROOT.RooRealVar("n3", "n3", 5, 1, 20)
         self.a = ROOT.RooRealVar("a3", "a3", -1.25, -3.5, -1)
@@ -235,50 +158,40 @@ class ChibModel(AbstractModel):
         self, canvas, dm_begin, dm_end, frac=(0.5, 0.5, 0.5), nbins=85,
             bgorder=5, sfracs=None, user_labels=None, has_3p=True):
         super(ChibModel, self).__init__(canvas=canvas, x0=dm_begin,
-                                        x1=dm_end, xfield="dmplusm1s", nbins=nbins,
+                                        x1=dm_end, xfield="dm", nbins=nbins,
                                         user_labels=user_labels)
 
         if sfracs:
-            sfracs1, sfracs2, sfracs3 = sfracs
+            sigma2, sfrac3 = sfracs
         else:
-            sfracs1, sfracs2, sfracs3 = (None, None, None)
-
-        self.chib1p = Chib1P(dm=self.x, frac=frac[0], sigma=sfracs1)
+            sigma2, sfrac3 = (None, None)
 
         self.chib2p = Chib2P(dm=self.x,
-                             mean_1p=self.chib1p.mean1,
-                             sigma1=self.chib1p.sigma1,
-                             sfrac=sfracs2,
+                             sigma=sigma2,
                              frac=frac[1])
         self.chib3p = Chib3P(dm=self.x,
-                             mean_1p=self.chib1p.mean1,
-                             sigma1=self.chib1p.sigma1,
-                             sfrac=sfracs3,
+                             sigma2=self.chib2p.sigma,
+                             sfrac=sfrac3,
                              frac=frac[2])
 
         self.bg = Background(dm=self.x, dm_begin=dm_begin, dm_end=dm_end,
                              order=bgorder)
 
         self.b = ROOT.RooRealVar("B", "Background", 1e+6, 0, 1.e+8)
-        self.n1p = ROOT.RooRealVar("N1P", "N1P", 1e+3, 0, 1.e+7)
         self.n2p = ROOT.RooRealVar("N2P", "N2P", 1e+2, 0, 1.e+7)
         self.n3p = ROOT.RooRealVar("N3P", "N3P", 1e+1, 0, 1.e+7)
 
         self.alist1 = ROOT.RooArgList(
             self.bg.pdf,
-            self.chib1p.pdf,
-            self.chib2p.pdf
+            self.chib2p.pdf,
+            self.chib3p.pdf
         )
 
         self.alist2 = ROOT.RooArgList(
             self.b,
-            self.n1p,
-            self.n2p
+            self.n2p,
+            self.n3p
         )
-
-        if has_3p:
-            self.alist1.add(self.chib3p.pdf)
-            self.alist2.add(self.n3p)
 
         self.pdf = ROOT.RooAddPdf("model", "model",
                                   self.alist1,
@@ -299,15 +212,6 @@ class ChibModel(AbstractModel):
                         ROOT.RooFit.Components(self.bg.pdf.GetName()),
                         ROOT.RooFit.LineStyle(ROOT.kDashed),
                         ROOT.RooFit.LineColor(ROOT.kBlue))
-
-        self.pdf.plotOn(frame,
-                        ROOT.RooFit.Components(self.chib1p.pdf1.GetName()),
-                        ROOT.RooFit.LineStyle(ROOT.kDashed),
-                        ROOT.RooFit.LineColor(ROOT.kMagenta + 1))
-        self.pdf.plotOn(frame,
-                        ROOT.RooFit.Components(self.chib1p.pdf2.GetName()),
-                        ROOT.RooFit.LineStyle(ROOT.kDashed),
-                        ROOT.RooFit.LineColor(ROOT.kGreen + 1))
 
         self.pdf.plotOn(frame,
                         ROOT.RooFit.Components(self.chib2p.pdf1.GetName()),

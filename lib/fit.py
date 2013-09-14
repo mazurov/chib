@@ -11,7 +11,7 @@ class Fit(object):
         self.model = model
         self.tuples = tuples
         self.cut = cut
-        
+
         self.is_unbinned = is_unbinned
         self.has_splot = has_splot
         self.nbins = nbins

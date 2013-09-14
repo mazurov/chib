@@ -1,0 +1,130 @@
+******************************************************************************************
+ Triggers for  Ups
+******************************************************************************************
+Hlt1_TIS Ups   #lines:     8 #events 845   
+ (  0.24 +- 0.17 )  	 Hlt1DiMuonHighMassDecision 
+ (  0.36 +- 0.20 )  	 Hlt1DiMuonLowMassDecision 
+ (  0.59 +- 0.26 )  	 Hlt1DiProtonDecision 
+ (  0.24 +- 0.17 )  	 Hlt1SingleElectronNoIPDecision 
+ (  0.36 +- 0.20 )  	 Hlt1SingleMuonHighPTDecision 
+ (  8.88 +- 0.98 )  	 Hlt1TrackAllL0Decision 
+ (  0.95 +- 0.33 )  	 Hlt1TrackMuonDecision 
+ (  1.89 +- 0.47 )  	 Hlt1TrackPhotonDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+Hlt1_TOS Ups   #lines:     8 #events 845   
+ ( 83.43 +- 1.28 )  	 Hlt1DiMuonHighMassDecision 
+ ( 18.58 +- 1.34 )  	 Hlt1DiMuonLowMassDecision 
+ (  0.59 +- 0.26 )  	 Hlt1SingleElectronNoIPDecision 
+ ( 62.49 +- 1.67 )  	 Hlt1SingleMuonHighPTDecision 
+ (  0.83 +- 0.31 )  	 Hlt1SingleMuonNoIPDecision 
+ (  9.82 +- 1.02 )  	 Hlt1TrackAllL0Decision 
+ ( 12.90 +- 1.15 )  	 Hlt1TrackMuonDecision 
+ (  0.47 +- 0.24 )  	 Hlt1TrackPhotonDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+Hlt1_TPS Ups   #lines:     7 #events 845   
+ ( 19.17 +- 1.35 )  	 Hlt1DiMuonHighMassDecision 
+ (  7.46 +- 0.90 )  	 Hlt1DiMuonLowMassDecision 
+ (  2.01 +- 0.48 )  	 Hlt1DiProtonDecision 
+ (  1.07 +- 0.35 )  	 Hlt1SingleMuonHighPTDecision 
+ (  0.12 +- 0.12 )  	 Hlt1SingleMuonNoIPDecision 
+ (  1.07 +- 0.35 )  	 Hlt1TrackAllL0Decision 
+ (  1.66 +- 0.44 )  	 Hlt1TrackMuonDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+Hlt2_TIS Ups   #lines:    16 #events 845   
+ (  0.12 +- 0.12 )  	 Hlt2CharmHadD2KS0H_D2KS0PiDecision 
+ (  0.12 +- 0.12 )  	 Hlt2CharmHadLambdaC2KPPiDecision 
+ (  0.24 +- 0.17 )  	 Hlt2DiMuonBDecision 
+ (  0.12 +- 0.12 )  	 Hlt2DiMuonDetachedHeavyDecision 
+ (  0.12 +- 0.12 )  	 Hlt2DiMuonJPsiHighPTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2ExpressJPsiTagProbeDecision 
+ (  0.12 +- 0.12 )  	 Hlt2IncPhiDecision 
+ (  0.12 +- 0.12 )  	 Hlt2RadiativeTopoPhotonL0Decision 
+ (  0.12 +- 0.12 )  	 Hlt2RadiativeTopoTrackTOSDecision 
+ (  0.12 +- 0.12 )  	 Hlt2SingleMuonHighPTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2SingleTFVHighPtElectronDecision 
+ (  0.36 +- 0.20 )  	 Hlt2Topo2BodyBBDTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2Topo3BodyBBDTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2TopoE2BodyBBDTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2TopoMu2BodyBBDTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2TopoMu3BodyBBDTDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+Hlt2_TOS Ups   #lines:    10 #events 845   
+ ( 91.60 +- 0.95 )  	 Hlt2DiMuonBDecision 
+ (  0.36 +- 0.20 )  	 Hlt2DiMuonDY1Decision 
+ (  4.02 +- 0.68 )  	 Hlt2DiMuonDY2Decision 
+ ( 29.94 +- 1.58 )  	 Hlt2DiMuonDY3Decision 
+ (  3.08 +- 0.59 )  	 Hlt2DiMuonDetachedDecision 
+ (  8.40 +- 0.95 )  	 Hlt2DiMuonDetachedHeavyDecision 
+ (  0.47 +- 0.24 )  	 Hlt2SingleMuonDecision 
+ ( 10.18 +- 1.04 )  	 Hlt2SingleMuonHighPTDecision 
+ (  0.24 +- 0.17 )  	 Hlt2SingleMuonLowPTDecision 
+ (  1.30 +- 0.39 )  	 Hlt2SingleMuonVHighPTDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+Hlt2_TPS Ups   #lines:    44 #events 845   
+ (  0.12 +- 0.12 )  	 Hlt2CharmHadD02HH_D02KKWideMassDecision 
+ (  0.24 +- 0.17 )  	 Hlt2CharmHadD02HH_D02KPiDecision 
+ (  0.12 +- 0.12 )  	 Hlt2CharmSemilepD02HHMuMuDecision 
+ (  0.12 +- 0.12 )  	 Hlt2CharmSemilepD02HHMuMuHardHadronsAndMuonsDecision 
+ (  0.12 +- 0.12 )  	 Hlt2CharmSemilepD02HHMuMuWideMassDecision 
+ (  0.12 +- 0.12 )  	 Hlt2CharmSemilepD02HMuNu_D02KMuNuDecision 
+ (  0.24 +- 0.17 )  	 Hlt2CharmSemilepD02HMuNu_D02KMuNuTightDecision 
+ (  0.12 +- 0.12 )  	 Hlt2CharmSemilepD2HMuMuDecision 
+ (  0.12 +- 0.12 )  	 Hlt2DiMuonAndD0Decision 
+ (  0.12 +- 0.12 )  	 Hlt2DiMuonAndDpDecision 
+ (  0.36 +- 0.20 )  	 Hlt2DiMuonAndLcDecision 
+ (  0.83 +- 0.31 )  	 Hlt2DiMuonAndMuonDecision 
+ (  9.94 +- 1.03 )  	 Hlt2DiMuonBDecision 
+ (  0.12 +- 0.12 )  	 Hlt2DiMuonDY1Decision 
+ (  0.24 +- 0.17 )  	 Hlt2DiMuonDY2Decision 
+ (  1.54 +- 0.42 )  	 Hlt2DiMuonDY3Decision 
+ (  1.66 +- 0.44 )  	 Hlt2DiMuonDetachedDecision 
+ (  2.49 +- 0.54 )  	 Hlt2DiMuonDetachedHeavyDecision 
+ (  1.30 +- 0.39 )  	 Hlt2DiMuonDetachedJPsiDecision 
+ (  0.36 +- 0.20 )  	 Hlt2DiMuonJPsiDecision 
+ (  4.02 +- 0.68 )  	 Hlt2DiMuonJPsiHighPTDecision 
+ (  0.12 +- 0.12 )  	 Hlt2DiMuonPsi2SDecision 
+ (  1.42 +- 0.41 )  	 Hlt2DiMuonPsi2SHighPTDecision 
+ (  1.42 +- 0.41 )  	 Hlt2DoubleDiMuonDecision 
+ (  0.24 +- 0.17 )  	 Hlt2Dst2PiD02MuMuDecision 
+ (  0.12 +- 0.12 )  	 Hlt2Dst2PiD02PiPiDecision 
+ (  0.47 +- 0.24 )  	 Hlt2ExpressJPsiDecision 
+ (  2.01 +- 0.48 )  	 Hlt2ExpressJPsiTagProbeDecision 
+ (  0.36 +- 0.20 )  	 Hlt2RadiativeTopoPhotonL0Decision 
+ (  0.36 +- 0.20 )  	 Hlt2RadiativeTopoTrackTOSDecision 
+ (  0.12 +- 0.12 )  	 Hlt2SingleMuonHighPTDecision 
+ (  1.78 +- 0.45 )  	 Hlt2Topo2BodyBBDTDecision 
+ (  0.71 +- 0.29 )  	 Hlt2Topo2BodySimpleDecision 
+ (  1.18 +- 0.37 )  	 Hlt2Topo3BodyBBDTDecision 
+ (  0.59 +- 0.26 )  	 Hlt2Topo3BodySimpleDecision 
+ (  0.59 +- 0.26 )  	 Hlt2Topo4BodyBBDTDecision 
+ (  0.24 +- 0.17 )  	 Hlt2Topo4BodySimpleDecision 
+ (  0.24 +- 0.17 )  	 Hlt2TopoE2BodyBBDTDecision 
+ (  0.24 +- 0.17 )  	 Hlt2TopoE3BodyBBDTDecision 
+ (  0.24 +- 0.17 )  	 Hlt2TopoE4BodyBBDTDecision 
+ (  2.49 +- 0.54 )  	 Hlt2TopoMu2BodyBBDTDecision 
+ (  2.01 +- 0.48 )  	 Hlt2TopoMu3BodyBBDTDecision 
+ (  0.71 +- 0.29 )  	 Hlt2TopoMu4BodyBBDTDecision 
+ (  0.36 +- 0.20 )  	 Hlt2TriMuonDetachedDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+L0_TIS Ups   #lines:     7 #events 845   
+ (  3.08 +- 0.59 )  	 L0DiMuonDecision 
+ (  9.47 +- 1.01 )  	 L0ElectronDecision 
+ (  4.02 +- 0.68 )  	 L0ElectronHiDecision 
+ ( 20.12 +- 1.38 )  	 L0HadronDecision 
+ (  9.94 +- 1.03 )  	 L0MuonDecision 
+ (  3.55 +- 0.64 )  	 L0PhotonDecision 
+ (  1.30 +- 0.39 )  	 L0PhotonHiDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+L0_TOS Ups   #lines:     7 #events 845   
+ ( 75.86 +- 1.47 )  	 L0DiMuonDecision 
+ (  1.89 +- 0.47 )  	 L0ElectronDecision 
+ (  0.83 +- 0.31 )  	 L0ElectronHiDecision 
+ (  9.23 +- 1.00 )  	 L0HadronDecision 
+ ( 90.65 +- 1.00 )  	 L0MuonDecision 
+ (  0.12 +- 0.12 )  	 L0PhotonDecision 
+ (  0.12 +- 0.12 )  	 L0PhotonHiDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+L0_TPS Ups   #lines:     1 #events 845   
+ ( 25.09 +- 1.49 )  	 L0DiMuonDecision 
+ (100.00 +- 0.12 )  	 TOTAL 
+******************************************************************************************

@@ -126,14 +126,14 @@ def pdg_round(ve):
         if nDec < 0:
             nDec = 0
         grouping = value > 9999
-        return locale.format('%.' + str(nDec) + 'f',round(value, roundAt), grouping=grouping)
+        return locale.format('%.' + str(nDec) + 'f', round(value, roundAt), grouping=grouping)
 
     tD = threeDigits(error)
     nD = nSignificantDigits(tD)
     expVal, expErr = frexp10(value)[1], frexp10(error)[1]
     extraRound = 1 if tD >= 950 else 0
     return (
-            formatValue(value, expVal, nDigitsValue(
+        formatValue(value, expVal, nDigitsValue(
             expVal, expErr, nD), extraRound),
         formatValue(error, expErr, nD, extraRound))
 
@@ -154,33 +154,36 @@ def long_format(val):
     grouping = val > 9999
     return locale.format("%d", val, grouping=grouping)
 
+
 def new_ve(*lst):
     l = []
     for v in lst:
-        l.append(v.value()+v.error())
-        l.append(v.value()-v.error())
-    a,b = min(l), max(l)
-    err = (b-a)/2.0
-    return RU.VE(a+err, err**2)
+        l.append(v.value() + v.error())
+        l.append(v.value() - v.error())
+    a, b = min(l), max(l)
+    err = (b - a) / 2.0
+    return RU.VE(a + err, err ** 2)
 
-def eff(db_mc, bin, np, nb=None):
+
+def eff(db_mc, bin, np, nb=None, ns=1):
     db_chib = db_mc["fits"][bin]
-    db_u1s = db_mc["u1s"][bin]
+    db_us = db_mc["u%ds" % ns][bin]
     keys = ("cb1%d" % np, "cb2%d" % np)
     if nb:
-        cb = RU.VE(str(db_chib[keys[nb-1]]["N"]))
-        ups = db_u1s[keys[nb-1]]
+        cb = RU.VE(str(db_chib[keys[nb - 1]]["N"]))
+        ups = db_us[keys[nb - 1]]
         return cb / ups
     else:
         values = []
         for k in keys:
             cb = RU.VE(str(db_chib[k]["N"]))
-            ups = db_u1s[k]
-            values.append(cb/ups)
+            ups = db_us[k]
+            values.append(cb / ups)
         return new_ve(values[0], values[1])
+
 
 def frac(year, db_chib, db_ups, db_mc, bin, np, ns=1):
     n_chib = RU.VE(str(db_chib[year][bin]["N%dP" % np]))
     n_ups = RU.VE(str(db_ups[year][bin]["N%dS" % ns]))
     e = eff(db_mc=db_mc, bin=bin, np=np)
-    return (n_chib/e)/n_ups
+    return (n_chib / e) / n_ups
