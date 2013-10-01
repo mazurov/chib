@@ -176,7 +176,7 @@ class ChibMC(AlgoMC):
             y_ups = Y(ups)
             c2_dtf = chi2_dtf(ups)
 
-            if c2_dtf >4:
+            if c2_dtf > 4:
                 continue
 
             lv01 = LV02(chib)
@@ -360,7 +360,7 @@ class UpsilonMC(AlgoMC):
                 continue
 
             c2_dtf = chi2_dtf(ups)
-            if pt_ups > 4:
+            if c2_dtf > 4:
                 continue
 
             y_ups = Y(ups)

@@ -4,125 +4,114 @@
 # ============================================================================
 from AnalysisPython.PyRoUts import VE
 # ============================================================================
-BINNING = [(27, 40)]
+# BINNING = [(18, 22), (22, 40)]
+BINNING = [(27, None)]
 # ============================================================================
 from lib import utils
 from lib import pdg
 from lib import db
+from lib import tmpl
 
 import os
 import sys
 
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path += [BASE_PATH, os.path.join(BASE_PATH, 'ext')]
 # ============================================================================
-import pystache
-# ============================================================================
-renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
-                             file_extension="tex")
+renderer = tmpl.renderer()
 # ============================================================================
 # Extract efficencies
-db = db.DB(chib="chib3s", mc="mc_3s", iups=4)
+db = db.DB(chib="chib3s_fix", mc="mc_3s_prob", iups=2)
 # ============================================================================
-alignment = "c" * (len(BINNING))
+alignment = "rrr" * (len(BINNING))
 # ============================================================================
 bins = ""
 for bin in BINNING:
-    bins += " & %d --- %d" % bin
-# ============================================================================
-for year in ["2011", "2012"]:
-    N = ["", ""]
-    B = ""
-    mean = ["", ""]
-    dmb2b1 = ["", ""]
-    frac = ["", ""]
-    a = ["", ""]
-    n = ["", ""]
-    sigma = ""
-    sigmab2b1 = ""
-    sfrac = [""]
+    bins += " & & \multicolumn{2}{c}{%s}" % (
+            "$%s < p_T(\Y3S) < %s \gevc$" % bin if bin[1] else "$p_T(\Y3S)> %d \gevc$" % bin[0]
+    )
+years = ""
+lines = ""
 
-    tau = ""
-    phi = ["","","","",""]
+i = 3
+for bin in BINNING:
+    years += " && \sqs = 7 \\tev & \sqs = 8\\tev"
+    lines += "\cmidrule{%d-%d}" % (i, i + 1)
+    i += 3
 
-    chi2 = ""
 
-    for bin in BINNING:
+N = ""
+B = ""
+mean = ""
+dm = ""
+dmb2b1 = ""
+frac = ""
+a = ""
+n = ""
+sigma = ""
+
+tau = ""
+phi = ["", "", "", "", ""]
+
+chi2 = ""
+for bin in BINNING:
+    # Float parameters
+    # N, mean, background, x2
+    for year in ["2011", "2012"]:
         fit = db.fit(year, bin)
-        for ip in range(1):
-            key = "N%dP" % (ip + 3)
-            if key in fit:
-                N[ip] += " & %s" % utils.latex_ve_pair(fit[key])
-            else:
-                N[ip] += " & - "
 
-            key = "mean_b1_%dp" % (ip + 3)
-            if key in fit:
-                mean[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])) * 1000)
-            else:
-                mean[ip] += " & - "
+        key = "mean_b1_3p"
+        mean += tmpl.output(year, fit, key, scale=1000)
 
-            key = "dmb2b1_%dp" % (ip + 3)
-            if key in fit:
-                dmb2b1[ip] += " & %s" % utils.latex_ve(
-                    VE(str(fit[key])) * 1000)
-            else:
-                dmb2b1[ip] += " & - "
+        key = "N3P"
+        N += tmpl.output(year, fit, key)
 
+        key = "dmb2b1_3p"
+        dmb2b1 += tmpl.output(year, fit, key, scale=1000, digits=2)
 
-            key = "frac%d" % (ip + 3)
-            if key in fit:
-                frac[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])))
-            else:
-                frac[ip] += " & - "
+        key = "frac3"
+        frac += tmpl.output(year, fit, key, digits=1)
 
-            key = "a%d" % (ip + 3)
-            if key in fit:
-                a[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])))
-            else:
-                a[ip] += " & - "
+        key = "a3"
+        a += tmpl.output(year, fit, key, digits=2)
 
-            key = "n%d" % (ip + 3)
-            if key in fit:
-                n[ip] += " & %s" % utils.latex_ve(VE(str(fit[key])))
-            else:
-                n[ip] += " & - "
+        key = "n3"
+        n += tmpl.output(year, fit, key, digits=1)
 
+        B += tmpl.output(year, fit, "B")
 
+        sigma += tmpl.output(year, fit, "sigma_b1_3p", scale=1000)
 
-        sigma += " & %s" % utils.latex_ve(VE(str(fit["sigma_b1_3p"])) * 1000)
-        B += " & %s" % utils.latex_ve_pair(fit["B"])
+        tau += tmpl.output(year, fit, "exp_tau")
 
-        tau += " & %s" % utils.latex_ve_pair(fit["exp_tau"])
         for iphi in range(5):
-            key = "poly_phi%d" % (iphi+1)
-            if key in fit:
-                phi[iphi] += " & %s" % utils.latex_ve(VE(str(fit[key])))
-            else:
-                phi[iphi] += " & - "
-        chi2 += " & %s" % utils.latex_ve_pair(fit["chi2"])
+            key = "poly_phi%d" % (iphi + 1)
+            phi[iphi] += tmpl.output(year, fit, key)
+
+        chi2 += tmpl.output(year, fit, "chi2", var=True)
+
     context = {
-        "year": year,
-        "e": "7" if year == "2011" else "8",
         "alignment": alignment,
-        "nbins": len(BINNING),
+        "cols": 3 * len(BINNING),
+        "years": years,
+        "lines": lines,
         "bins": bins,
         "B": B,
+        "mean3": mean,
         "sigma": sigma,
-        # "sigmab2b1": sigmab2b1,
         "chi2": chi2,
         "tau": tau,
     }
 
-    for ip in range(1):
-        context["N%d" % (ip+3)] = N[ip]
-        context["B%d" % (ip+3)] = B[ip]
-        context["mean%d" % (ip+3)] = mean[ip]
-        context["dmb2b1_%d" % (ip+3)] = dmb2b1[ip]
-        context["frac%d" % (ip+3)] = frac[ip]
-        context["a%d" % (ip+3)] = a[ip]
-        context["n%d" % (ip+3)] = n[ip]
+    context["N3"] = N
+    context["B3"] = B
+
+    context["dmb2b1_3"] = dmb2b1
+    context["frac3"] = frac
+    context["a3"] = a
+    context["n3"] = n
+
+    context["dm_3"] = dm
 
     for iphi in range(5):
-        context["phi%d" % (iphi + 1)] = phi[iphi]
-    print renderer.render_name("fit3s", context)
+        context["phi%d" % iphi] = phi[iphi]
+
+print renderer.render_name("fits3s", context)

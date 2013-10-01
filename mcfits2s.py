@@ -19,7 +19,7 @@ from collections import defaultdict
 
 
 def save(result):
-    db = shelve.open('data/mc_2s.db')
+    db = shelve.open('data/mc_2s_prob.db')
     fits = db.get("fits", {})
     for b in result.keys():
         bn = fits.get(b, {})
@@ -36,7 +36,7 @@ def save(result):
 cfg = utils.json("configs/mcfits2s.json")
 
 # binning = [(18, None), (18, 22), (22, 30)]
-binning = [(22, 30)]
+binning = [(18, None)]
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])
@@ -60,9 +60,9 @@ tuples.SetEntryList(mc_elist)
 # ============================================================================
 
 result = defaultdict(dict)
-for ip in range(1,2):
+for ip in range(2):
     p = ip+2
-    for b in range(2, 3):
+    for b in range(1, 3):
         name = "chib{b}({p}P)".format(b=b, p=p)
         x1, x2, nbins = cfg["xaxis"][ip]
         model = ChibMCModel(canvas=canvas, p=p, b=b,
@@ -71,14 +71,14 @@ for ip in range(1,2):
                             nbins=nbins
                             )
         # model.chib.sigma.fix(0.0205)
-        cut = {"np": p, "nb": b, "dm": [x1, x2]}
+        cut = {"np": p, "nb": b, "dmplusm2s": [x1, x2]}
         for bin in binning:
             # model.user_labels = user_labels(bin[0], bin[1])
             cut["pt_ups"] = bin
             f = fit.Fit(model=model,
                         tuples=tuples,
                         cut=cut,
-                        field="dm",
+                        field="dmplusm2s",
                         has_splot=True,
                         is_unbinned=cfg["is_unbinned"],
                         nbins=nbins
@@ -92,7 +92,6 @@ for ip in range(1,2):
             if not is_good:
                 print t.red("Bad fit:"), name
                 shell()
-            shell()
             result[bin][db_key] = model.params()
             model.save_image("figs/mc/fits2s/%s.pdf" % image_name)
 print result

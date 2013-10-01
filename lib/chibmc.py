@@ -14,9 +14,9 @@ from IPython import embed as shell  # noqa
 class Chib1P(object):
 
     def __init__(self, dm):
-        dm_pdg = pdg.DM1S[0].value()
-        self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
-                                    dm_pdg - 0.05, dm_pdg + 0.05)
+        m_pdg = (pdg.CHIB11P.value()+pdg.CHIB21P.value())/2
+        self.mean = ROOT.RooRealVar("mean", "mean", m_pdg,
+                                    m_pdg - 0.05, m_pdg + 0.05)
 
         self.sigma = ROOT.RooRealVar("sigma", "sigma",
                                      0.024,
@@ -44,9 +44,9 @@ class Chib1P(object):
 class Chib2P(object):
 
     def __init__(self, dm):
-        dm_pdg = pdg.DM1S[2].value()
-        self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
-                                    dm_pdg-0.1, dm_pdg+0.1)
+        m_pdg = (pdg.CHIB12P.value()+pdg.CHIB22P.value())/2
+        self.mean = ROOT.RooRealVar("mean", "mean", m_pdg,
+                                    m_pdg-0.1, m_pdg+0.1)
 
         self.sigma = ROOT.RooRealVar("sigma", "sigma",
                                      0.045, 0.045 - 0.03, 0.045 + 0.03)
@@ -72,9 +72,9 @@ class Chib2P(object):
 class Chib3P(object):
 
     def __init__(self, dm):
-        dm_pdg = pdg.DM1S[4].value()
-        self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
-                                    dm_pdg-0.1, dm_pdg+0.1)
+        m_pdg = (pdg.CHIB13P.value()+pdg.CHIB23P.value())/2
+        self.mean = ROOT.RooRealVar("mean", "mean", m_pdg,
+                                    m_pdg-0.1, m_pdg+0.1)
 
         self.sigma = ROOT.RooRealVar("sigma", "sigma",
                                      0.045, 0.045 - 0.03, 0.045 + 0.03)
@@ -114,7 +114,7 @@ class ChibMCModel(AbstractModel):
     def __init__(self, canvas, p, dm_begin, dm_end,
                  dm=None, b=None, nbins=100, user_labels=None):
         super(ChibMCModel, self).__init__(canvas=canvas, x=dm, x0=dm_begin,
-                                          x1=dm_end, xfield="dm", nbins=nbins,
+                                          x1=dm_end, xfield="dmplusm1s", nbins=nbins,
                                           user_labels=user_labels)
         self.p = p
 

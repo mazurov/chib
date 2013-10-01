@@ -10,7 +10,7 @@ from Gaudi.Configuration import *
 from GaudiKernel.SystemOfUnits import MeV, GeV, mm
 import BenderTools.TisTos
 import BenderTools.Fill
-# import sys
+import random
 from IPython import embed as shell
 # =============================================================================
 # Simple class to look for Chi_b-peak
@@ -31,15 +31,19 @@ def _initialize(self):
 
     lines = {}
     lines['Ups'] = {}
-    lines['Ups']['L0TOS'] = 'L0DiMuon.*Decision'
-    lines['Ups'][
-        'L0TIS'] = 'L0(Hadron|Muon|DiMuon|Photon|Electron)Decision'
-    lines['Ups']['Hlt1TOS'] = 'Hlt1DiMuonHighMass.*Decision'
+    # lines['Ups']['L0TIS'] = 'L0(Hadron|Muon|DiMuon|Photon|Electron)Decision'
+    # lines['Ups']['Hlt1TIS'] = 'Hlt1TrackAll.*Decision'
+    # lines['Ups']['Hlt2TIS'] = ('Hlt2(Charm|Topo|Single|Express|Inc|Tri).'
+    #                            '*Decision')
+
+    lines['Ups']['L0TIS'] = 'L0(Hadron|Muon|DiMuon|Photon|Electron)Decision'
     lines['Ups']['Hlt1TIS'] = 'Hlt1TrackAll.*Decision'
-    # lines['Ups']['Hlt2TOS'] = 'Hlt2DiMuonHighMass.*Decision'
-    lines['Ups']['Hlt2TOS'] = 'Hlt2(DiMuon|SingleMuonHighPT).*Decision'
     lines['Ups']['Hlt2TIS'] = ('Hlt2(Charm|Topo|Single|Express|Inc|Tri).'
                                '*Decision')
+
+    lines['Ups']['L0TOS'] = 'L0DiMuon.*Decision'
+    lines['Ups']['Hlt1TOS'] = 'Hlt1DiMuonHighMass.*Decision'
+    lines['Ups']['Hlt2TOS'] = 'Hlt2DiMuonB.*Decision'
 
     sc = self.tisTos_initialize(triggers, lines)
     if sc.isFailure():
@@ -93,9 +97,18 @@ class Chib(Algo):
         tup = self.nTuple('Chib')
 
         chi2_dtf = DTF_CHI2NDOF(True)
+
         deltaM = DTF_FUN(M - M1, True)
 
-        mups = DTF_FUN(M, True)
+        mups = M1
+        mups_dtf = DTF_FUN(M1, True)
+        mups_dtf_false = DTF_FUN(M1, False)
+
+
+        deltaM = M - M1
+        deltaM_dtf = DTF_FUN(M - M1, True)
+        deltaM_dtf_false = DTF_FUN(M - M1, False)
+
         minDLLmu = MINTREE(ISBASIC, PIDmu - PIDpi)
         kullback = MINTREE(ISBASIC & HASTRACK, CLONEDIST)
 
@@ -109,6 +122,10 @@ class Chib(Algo):
         dm_1s_ = ADMASS('Upsilon(1S)')
         dm_2s_ = ADMASS('Upsilon(2S)')
         dm_3s_ = ADMASS('Upsilon(3S)')
+
+        perevent = 0
+        odin = self.get(self.RootInTES + 'DAQ/ODIN')
+        event_number = odin.eventNumber()
 
         for chib in chibs:
             # shell()
@@ -127,66 +144,75 @@ class Chib(Algo):
 
             if not (mu1 and mu2):
                 continue
-            dm = (M12(chib) - M1(chib)) / GeV
-            if dm > 2:
+
+            dm_dtf = deltaM_dtf(chib) / GeV
+
+            if dm_dtf > 2:
                 continue
 
-            dm_1s = dm_1s_(ups) / GeV
-            dm_2s = dm_2s_(ups) / GeV
-            dm_3s = dm_3s_(ups) / GeV
-
-            # if dm_1s > 0.2:
-            #     continue
+            m_dtf = mups_dtf(chib) / GeV
+            if not 8.5 < m_dtf < 12:
+                continue
 
             pt_ups = PT(ups) / GeV
-            # if pt_ups < 6:
-            #     continue
+            if pt_ups < 6:
+                continue
 
             pt_g = PT(gam) / GeV
-            # if pt_g < 0.6:
-            #     continue
+            if pt_g < 0.6:
+                continue
 
             c2_dtf_ups = chi2_dtf(ups)
-            # if not 0 < c2_dtf_ups < 4:
-            #     continue
+            if not (0 < c2_dtf_ups < 4):
+                continue
 
             cl_g = CL(gam)
-            # if cl_g < 0.01:
-            #     continue
+            if cl_g < 0.01:
+                continue
 
             lv01 = LV02(chib)
-            # if lv01 < 0:
-            #     continue
+            if lv01 < 0:
+                continue
 
             dll_min = minDLLmu(ups)
-            # if dll_min < 0:
-            #     continue
+            if dll_min < 0:
+                continue
 
             y = Y(ups)
-            # if not 2 < y < 4.5:
-            #     continue
+            if not (2 < y < 4.5):
+                continue
 
-            tup.column('dm', dm)
-            tup.column('dmplusm1s', dm+9.46030)
-            tup.column('dmplusm2s', dm+10.02326)
-            tup.column('dmplusm3s', dm+10.3552)
-            tup.column('m', M1(chib) / GeV)
+            prob1 = PROBNNmu(mu1)
+            prob2 = PROBNNmu(mu2)
+            minprob = min(prob1, prob2)
+            if minprob < 0.5:
+                continue
+
+            tup.column('dm', deltaM(chib) / GeV)
+            tup.column('dm_dtf', dm_dtf)
+            tup.column('dm_dtf_false', deltaM_dtf_false(chib) / GeV)
+
+            tup.column('dmplusm1s', dm_dtf + 9.46030)
+            tup.column('dmplusm2s', dm_dtf + 10.02326)
+            tup.column('dmplusm3s', dm_dtf + 10.3552)
+
+            tup.column('mups', mups(chib) / GeV)
+            tup.column('mups_dtf', m_dtf)
+            tup.column('mups_dtf_false', mups_dtf_false(chib) / GeV)
+
             tup.column('pt_g', pt_g)
             tup.column('pt_ups', pt_ups)
             tup.column("y", y)
             tup.column('c2_dtf', c2_dtf_ups)
-            tup.column('dm_1s', dm_1s)
-            tup.column('dm_2s', dm_2s)
-            tup.column('dm_3s', dm_3s)
+            tup.column('dm_1s', dm_1s_(ups) / GeV)
+            tup.column('dm_2s', dm_2s_(ups) / GeV)
+            tup.column('dm_3s', dm_3s_(ups) / GeV)
             tup.column('dll_min', dll_min)
             tup.column("y_chib", Y(chib))
 
             tup.column("lv01", lv01)
             tup.column("chi2_vx", VCHI2(ups.endVertex()))
 
-            tup.column('mu_dtf', mups(ups) / GeV)
-            tup.column('m_dtf', mups(chib) / GeV)
-            tup.column('dm_dtf', deltaM(chib) / GeV)
 
             tup.column('pt_chib', PT(chib) / GeV)
             tup.column('cl_g', cl_g)
@@ -194,13 +220,13 @@ class Chib(Algo):
             # pi0veto = LoKi.Photons.pi0Veto ( gam , allg , 25 * MeV , -1 )
             # tup.column ( 'pi0veto'  , pi0veto , 0 , 1 )
 
-            tup.column('p_mu1', P(mu1) / GeV)
-            tup.column('p_mu2', P(mu2) / GeV)
-            tup.column('pt_mu1', PT(mu1) / GeV)
-            tup.column('pt_mu2', PT(mu2) / GeV)
+            min_p_mu = min(P(mu1), P(mu2))
+            tup.column('min_p_mu', min_p_mu / GeV)
 
-            tup.column('probnn_mu1', PROBNNmu(mu1))
-            tup.column('probnn_mu2', PROBNNmu(mu2))
+            min_pt_mu = min(PT(mu1), PT(mu2))
+            tup.column('min_pt_mu', min_pt_mu / GeV)
+
+            tup.column('minprob', minprob)
 
             tup.column('kl_dist', kullback(ups))
             tup.column('max_tr_chi2_dof', max_tr_chi2_dof(ups))
@@ -217,6 +243,10 @@ class Chib(Algo):
 
             # add some reco-summary information
             self.addRecSummary(tup, rc_summary)
+
+            perevent += 1
+            tup.column("perevent", perevent)
+            tup.column("event_number", event_number)
 
             tup.write()
             # chib.save ( 'chib' )
@@ -267,20 +297,26 @@ class Upsilon(Algo):
 
         # =====================================================================
         chi2_dtf = DTF_CHI2NDOF(True)
-        # deltaM = DTF_FUN(M - M1, True)
-        mups = DTF_FUN(M, True)
+
+        mups_dtf = DTF_FUN(M, True)
+        mups_dtf_false = DTF_FUN(M, False)
+
         minDLLmu = MINTREE(ISBASIC, PIDmu - PIDpi)
         kullback = MINTREE(ISBASIC & HASTRACK, CLONEDIST)
 
         dm_1s = ADMASS('Upsilon(1S)')
         dm_2s = ADMASS('Upsilon(2S)')
         dm_3s = ADMASS('Upsilon(3S)')
+
+
         # =====================================================================
         tup = self.nTuple('Upsilon')
         # collect TisTos-statistics
         # =====================================================================
         # Loop:
         # =====================================================================
+        perevent = 0
+
         for ups in upsilons:
             # =================================================================
             self.decisions(ups, self.triggers['Ups'])
@@ -291,39 +327,49 @@ class Upsilon(Algo):
             if not (mu1 and mu2):
                 continue
             # =================================================================
-            m = M(ups) / GeV
-            if not 8.5 < m < 12:
+            m_dtf = mups_dtf(ups) / GeV
+            if not 8.5 < m_dtf < 12:
                 continue
 
             pt_ups = PT(ups) / GeV
-            # if not pt_ups > 6:
-            #     continue
+
+            if pt_ups < 6:
+                continue
 
             c2_dtf = chi2_dtf(ups)
-            # if not 0 < c2_dtf < 4:
-            #     continue
+            if not (0 < c2_dtf < 4):
+                continue
 
             dll_min = minDLLmu(ups)
-            # if dll_min < 0:
-            #     continue
+            if dll_min < 0:
+                continue
 
             y = Y(ups)
-            # if not 2 < y < 4.5:
-            #     continue
+            if not (2 < y < 4.5):
+                continue
 
-            # tup.column ( 'dm'     , dm           / GeV )
-            tup.column('m', m)
+            prob1 = PROBNNmu(mu1)
+            prob2 = PROBNNmu(mu2)
+            minprob = min(prob1, prob2)
+            if minprob < 0.5:
+                continue
+
+
+            tup.column('m_dtf', m_dtf)
+            tup.column('m', M(ups) / GeV)
+            tup.column('m_dtf_false', mups_dtf_false(ups) / GeV)
+
             tup.column('c2_dtf', c2_dtf)
-            tup.column('m_dtf', mups(ups) / GeV)
 
             tup.column('pt_ups', pt_ups)
-            tup.column('p_mu1', P(mu1) / GeV)
-            tup.column('p_mu2', P(mu2) / GeV)
-            tup.column('pt_mu1', PT(mu1) / GeV)
-            tup.column('pt_mu2', PT(mu2) / GeV)
 
-            tup.column('probnn_mu1', PROBNNmu(mu1))
-            tup.column('probnn_mu2', PROBNNmu(mu2))
+            min_p_mu = min(P(mu1), P(mu2))
+            tup.column('min_p_mu', min_p_mu / GeV)
+
+            min_pt_mu = min(PT(mu1), PT(mu2))
+            tup.column('min_pt_mu', min_pt_mu / GeV)
+
+            tup.column('minprob', minprob)
 
             tup.column('dm_1s', dm_1s(ups) / GeV)
             tup.column('dm_2s', dm_2s(ups) / GeV)
@@ -340,7 +386,10 @@ class Upsilon(Algo):
                         self.lines['Ups'], verbose=True)
 
             # add some reco-summary information
-            self.addRecSummary(tup, rc_summary)
+            # self.addRecSummary(tup, rc_summary)
+
+            perevent += 1
+            tup.column("perevent", perevent)
 
             tup.write()
 
@@ -410,6 +459,15 @@ def configure(datafiles, catalogs=[], castor=True, params={}):
     from Configurables import Gaudi__IODataManager as IODataManager
     IODataManager().AgeLimit = 2
     # =========================================================================
+    from Configurables import TrackScaleState
+    state_scale = TrackScaleState('StateScale', RootInTES='/Event/BOTTOM')
+    # =========================================================================
+    davinci.UserAlgorithms = [
+        state_scale,
+        "ChibAlg",
+        "UpsilonAlg"
+    ]
+    # =========================================================================
     # come back to Bender
     setData(datafiles, catalogs, castor)
     gaudi = appMgr()
@@ -434,9 +492,10 @@ def configure(datafiles, catalogs=[], castor=True, params={}):
         # take care about the proper particle combiner
         ParticleCombiners={'': 'LoKi::VertexFitter'}
     )
+
     # =========================================================================
-    mainSeq = gaudi.algorithm('GaudiSequencer/DaVinciUserSequence', True)
-    mainSeq.Members += [alg_chib.name(), alg_upsilon.name()]
+    # mainSeq = gaudi.algorithm('GaudiSequencer/DaVinciUserSequence', True)
+    # mainSeq.Members += [state_scale, alg_chib.name(), alg_upsilon.name()]
     # =========================================================================
     return SUCCESS
 
@@ -458,13 +517,23 @@ def main():
     # configure ( db["chi_down"] , castor = True, skip=skip,step=step )
     # db = shelve.open("/afs/cern.ch/user/i/ibelyaev/public/LFNs/lfns.db", "r")
     # configure(db["DiMuon.Y&ChiB.Stripping17;Down"][2:3], castor=True)
-    files = [
-        '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000054_1.bottom.mdst',
-        '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000031_1.bottom.mdst',
-        '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000027_1.bottom.mdst',
-        '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000016_1.bottom.mdst'
-    ]
-    configure(files, castor=True, params={"year": "2011"})
+    files = {
+        "2011":[
+            '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000054_1.bottom.mdst',
+            '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000031_1.bottom.mdst',
+            '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000027_1.bottom.mdst',
+            '/lhcb/LHCb/Collision11/BOTTOM.MDST/00024290/0000/00024290_00000016_1.bottom.mdst'
+        ],
+        "2012": [
+            '/lhcb/LHCb/Collision12/BOTTOM.MDST/00024670/0000/00024670_00000008_1.bottom.mdst',
+            '/lhcb/LHCb/Collision12/BOTTOM.MDST/00024674/0000/00024674_00000015_1.bottom.mdst',
+            '/lhcb/LHCb/Collision12/BOTTOM.MDST/00024670/0000/00024670_00000006_1.bottom.mdst',
+            '/lhcb/LHCb/Collision12/BOTTOM.MDST/00024674/0000/00024674_00000090_1.bottom.mdst',
+            '/lhcb/LHCb/Collision12/BOTTOM.MDST/00024674/0000/00024674_00000057_1.bottom.mdst'
+        ]
+    }
+    year = "2012"
+    configure(files[year], castor=True, params={"year": year})
     run(1000)
 
 

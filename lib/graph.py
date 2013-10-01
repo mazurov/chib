@@ -4,14 +4,16 @@ import AnalysisPython.PyRoUts as RU
 
 class Graph(object):
 
-    def __init__(self, color, marker, values, title=""):
+    def __init__(self, color, marker, values, space=1, title=""):
         self.color = color
         self.marker = marker
         self.title = title
         self.values = values
 
+        self.space = space
         self.max = -1e+8
         self.min = 1e+8
+
 
 
     def _get_axis(self):
@@ -26,12 +28,12 @@ class Graph(object):
         h.SetMarkerColor(self.color)
         h.SetMarkerStyle(self.marker)
         h.SetLineWidth(1)
-        print self._get_axis()
+        # print self._get_axis()
         for i, v in enumerate(self.values):
             if v[1] is not None:
                 p = v[1]
-                emax = p.value()+p.error()
-                emin = p.value()-p.error()
+                emax = p.value()+p.error()*self.space
+                emin = p.value()-p.error()*self.space
                 self.max = emax if emax > self.max else self.max
                 self.min = emin if emin < self.min else self.min
                 h[i + 1] = p
@@ -66,11 +68,11 @@ class MultiGraph(object):
                 h.SetMaximum(ymax)
             self.hists.append(h)
 
-        if not ymin:
+        if ymin is None:
             for i, h in enumerate(self.hists):
                 h.SetMinimum(cmin)
 
-        if not ymax:
+        if ymax is None:
             for i, h in enumerate(self.hists):
                 h.SetMaximum(cmax)
 
@@ -84,9 +86,16 @@ class MultiGraph(object):
     def draw(self, to_file=None):
         self.canvas = ROOT.TCanvas(RU.rootID("c_"), self.title, 800, 600)
         for i, h in enumerate(self.hists):
-            same = "same" if i > 0 else ""
+            same = "E1 same" if i > 0 else "E1"
             h.Draw(same)
 
         self.legend()
         if to_file:
             self.canvas.SaveAs(to_file)
+
+
+COLORS = {"2011": ROOT.kBlue, "2012": ROOT.kRed}
+MARKERS = {"2011": ROOT.kFullSquare, "2012": ROOT.kOpenCircle}
+
+CHIB_COLORS = {1: ROOT.kBlue, 2: ROOT.kRed, 3: ROOT.kCyan}
+CHIB_MARKERS = {1: ROOT.kFullSquare, 2: ROOT.kOpenCircle, 3: ROOT.kFullTriangleUp}

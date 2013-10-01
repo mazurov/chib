@@ -28,7 +28,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
                              file_extension="tex")
 # ============================================================================
 # Extract efficencies
-db = db.DB()
+db = db.DB(chib="chib1s_mfix", mc="mc_1s_prob", iups=1)
 # ============================================================================
 alignment = "c" * (len(BINNING))
 # ============================================================================
@@ -103,6 +103,6 @@ for ip in range(3):
                         year], marker=markers[year], values=values)
         graphs.append(g)
 
-    mg = graph.MultiGraph(graphs=graphs)
+    mg = graph.MultiGraph(graphs=graphs, ymin=0)
     mg.draw()
     mg.canvas.SaveAs("figs/frac/cb%d_frac.pdf" % (ip+1))

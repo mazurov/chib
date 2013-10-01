@@ -14,9 +14,9 @@ from IPython import embed as shell  # noqa
 class Chib3P(object):
 
     def __init__(self, dm):
-        dm_pdg = pdg.DM3S[4].value()
-        self.mean = ROOT.RooRealVar("mean", "mean", dm_pdg,
-                                    dm_pdg-0.05, dm_pdg+0.05)
+        m_pdg = (pdg.CHIB13P.value()+pdg.CHIB23P.value())/2
+        self.mean = ROOT.RooRealVar("mean", "mean", m_pdg,
+                                    m_pdg-0.05, m_pdg+0.05)
 
         self.sigma = ROOT.RooRealVar("sigma", "sigma",
                                      0.02,0.02 - 0.015, 0.02 + 0.015)
@@ -37,7 +37,7 @@ class Background(object):
 
 
         self.tau = ROOT.RooRealVar("tau", "tau", -1.5, -100, 0)
-        
+
         self.pdf = ExpoPositive("bg", "bg", dm, self.tau, self.phi1,
             dm_begin, dm_end)
 
@@ -46,7 +46,7 @@ class ChibMCModel(AbstractModel):
     def __init__(self, canvas, p, dm_begin, dm_end,
                  dm=None, b=None, nbins=100, user_labels=None):
         super(ChibMCModel, self).__init__(canvas=canvas, x=dm, x0=dm_begin,
-                                          x1=dm_end, xfield="dm", nbins=nbins,
+                                          x1=dm_end, xfield="dmplusm3s", nbins=nbins,
                                           user_labels=user_labels)
         self.p = p
 
@@ -78,7 +78,7 @@ class ChibMCModel(AbstractModel):
         #frame.GetXaxis().SetTitle("m(#mu^{+}#mu^{-}#gamma) - "
         #                          "m(#mu^{+ }#mu^{-}) [GeV/c^{2}]")
         #self.candidates()
-        
+
     def draw_after(self):
         frame = self.frame
         frame.drawAfter("model_Norm[%s]_Comp[cb]" % self.xfield, "h_ds")

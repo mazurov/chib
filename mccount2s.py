@@ -4,7 +4,6 @@ canvas = ROOT.TCanvas("c1", "c1", 1024, 768)
 
 from lib import utils
 
-import sys
 import shelve
 from IPython import embed as shell  # noqa
 from ext.blessings import Terminal
@@ -12,7 +11,7 @@ from collections import defaultdict
 
 
 def save(result):
-    db = shelve.open('data/mc_2s.db')
+    db = shelve.open('data/mc_2s_prob.db')
     count = db.get("u2s", {})
 
     count.update(dict(result))
@@ -42,7 +41,7 @@ db.close()
 tuples.SetEntryList(mc_ulist)
 
 
-binning = [(18, 22), (22, 30)]
+binning = [(18, 25), (25, 40)]
 
 result = defaultdict(dict)
 for ip in range(2):

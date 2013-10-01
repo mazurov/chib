@@ -32,7 +32,7 @@ def user_labels(pt_ups1, pt_ups2):
 # mc_mass - pt_g > 1.3
 
 def save(result):
-    db = shelve.open('data/mc_1s.db')
+    db = shelve.open('data/mc_1s_prob.db')
     fits = db.get("fits", {})
 
     fits.update(dict(result))
@@ -68,12 +68,12 @@ def graphs(result):
 
 cfg = utils.json("configs/mcfits1s.json")
 
-# binning = [(6,   8), (8, 10), (10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30), (14, None)]
+binning = [(6,   8), (8, 10), (10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30), (14, None)]
 # binning = [(10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30)]
 # binning = [(6, 8)]
 # binning = [(22, 30)]
 # binning = [(6, 8), (8,10)]
-binning = [(18, None)]
+# binning = [(6, 8)]
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])
@@ -107,7 +107,7 @@ for p in range(1, 4):
                             nbins=nbins
                             )
         # model.chib.sigma.fix(0.0205)
-        cut = {"np": p, "nb": b, "dm": [x1, x2]}
+        cut = {"np": p, "nb": b, "dmplusm1s": [x1, x2]}
         for bin in binning:
             # model.user_labels = user_labels(bin[0], bin[1])
             cut["pt_ups"] = bin
@@ -137,7 +137,7 @@ for p in range(1, 4):
             #     if not is_good:
             #         print t.red("Bad fit:"), name
             #         shell()
-            
+
             result[bin][db_key] = model.params()
             model.save_image("figs/mc/fits/%s.pdf" % image_name)
 print result

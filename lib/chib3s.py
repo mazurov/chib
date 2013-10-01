@@ -46,11 +46,11 @@ class Background(object):
 class Chib3P(object):
 
     def __init__(self, dm, sigma, frac):
-        dm_pdg = pdg.DM3S[4].value()
-        self.mean1 = ROOT.RooRealVar("mean_b1_3p", "mean_b1_3p", dm_pdg,
-                                     dm_pdg - 0.05, dm_pdg + 0.05)
+        m_pdg = pdg.CHIB13P.value()
+        self.mean1 = ROOT.RooRealVar("mean_b1_3p", "mean_b1_3p", m_pdg,
+                                     m_pdg - 0.1, m_pdg + 0.1)
 
-        diff = pdg.DM2S[5].value() - pdg.DM2S[4].value()
+        diff = pdg.CHIB23P.value() - pdg.CHIB13P.value()
         self.dmb2b1 = ROOT.RooRealVar("dmb2b1_3p", "dmb2b1_3p", diff)
         self.dmb2b1.setConstant(True)
 
@@ -100,7 +100,7 @@ class ChibModel(AbstractModel):
         self, canvas, dm_begin, dm_end, frac=(0.5, 0.5, 0.5), nbins=85,
             bgorder=5, sigma=None, user_labels=None, has_3p=True):
         super(ChibModel, self).__init__(canvas=canvas, x0=dm_begin,
-                                        x1=dm_end, xfield="dm", nbins=nbins,
+                                        x1=dm_end, xfield="dmplusm3s", nbins=nbins,
                                         user_labels=user_labels)
 
         self.chib3p = Chib3P(dm=self.x,

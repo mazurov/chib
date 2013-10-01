@@ -1,7 +1,7 @@
 #!/usr/bin/env ganga
 import json
 
-year = "2011"
+year = "2012"
 
 my_area = "/afs/cern.ch/work/a/amazurov/cmtuser"
 my_opts = "/../final/tuples.py"

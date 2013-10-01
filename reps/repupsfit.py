@@ -8,6 +8,7 @@ BINNING = [(6, 8), (8, 10), (10, 12), (12, 14), (14, 18), (18, 22), (22, 30),
            (18, 30)]
 
 BINNINGS = [[(6, 8), (8, 10), (10, 12), (12, 14)], [(14, 18), (18, 22), (22, 30), (18, 30)]]
+BINNINGS = [[(6, None)]]
 # ============================================================================
 from lib import utils
 from lib import pdg
@@ -25,7 +26,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
                              file_extension="tex")
 # ============================================================================
 # Extract efficencies
-db = db.DB(ups="ups_1cb")
+db = db.DB(ups="ups_dtf")
 
 print renderer.render_name("upsfit-head", {})
 for BINNING in BINNINGS:

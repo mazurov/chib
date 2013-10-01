@@ -19,7 +19,7 @@ from collections import defaultdict
 
 
 def save(result):
-    db = shelve.open('data/mc_3s.db')
+    db = shelve.open('data/mc_3s_prob.db')
     fits = db.get("fits", {})
     for b in result.keys():
         bn = fits.get(b, {})
@@ -36,7 +36,7 @@ def save(result):
 cfg = utils.json("configs/mcfits3s.json")
 
 # binning = [(18, None), (18, 22), (22, 30)]
-binning = [(27, 40), (27, 40)]
+binning = [(27, None)]
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])
@@ -71,14 +71,14 @@ for b in range(1, 3):
                         nbins=nbins
                         )
     # model.chib.sigma.fix(0.0205)
-    cut = {"np": p, "nb": b, "dm": [x1, x2]}
+    cut = {"np": p, "nb": b, "dmplusm3s": [x1, x2]}
     for bin in binning:
         # model.user_labels = user_labels(bin[0], bin[1])
         cut["pt_ups"] = bin
         f = fit.Fit(model=model,
                     tuples=tuples,
                     cut=cut,
-                    field="dm",
+                    field="dmplusm3s",
                     has_splot=True,
                     is_unbinned=cfg["is_unbinned"],
                     nbins=nbins

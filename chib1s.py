@@ -27,7 +27,7 @@ def user_labels(pt_ups1, pt_ups2):
     return _user_labels
 
 
-def save(fit, suffix="dm"):
+def save(fit, suffix="mfix"):
     bin = tuple(fit.cut["pt_ups"])
     dbname = "chib1s" + ("_" + suffix if suffix else "")
     db = shelve.open('data/%s.db' % dbname)
@@ -46,13 +46,38 @@ def save(fit, suffix="dm"):
 def _sfracs(bin):
     db = shelve.open("data/mc_1s.db", "r")
     tbin = tuple(bin)
+
     if tbin in db["fits"]:
         db_fits = db["fits"][tuple(tbin)]
         s1 = db_fits["cb11"]["sigma"][0]
-        s2s1 = db_fits["cb12"]["sigma"][0] / s1
-        s3s1 = db_fits["cb13"]["sigma"][0] / s1
-        return s1, s2s1, s3s1
+        # s2s1 = db_fits["cb12"]["sigma"][0] / s1
+        # s3s1 = db_fits["cb13"]["sigma"][0] / s1
+        # return s1, s2s1, s3s1
+        return s1, 1.5 if bin != (22, 30) else 1.6, 2
     return None
+
+def _lambda(pt_ups1):
+    # default_frac = 0.5
+
+    # a1 = db.alphab1(bin, 1)
+    # a2 = db.alphab1(bin, 2)
+    # a3 = db.alphab1(bin, 3)
+    # if not (a1 or a2 or a3):
+    #     print t.red("No b1 fraction informaition for the bin")
+    # frac = (a1 if a1 else 0.6, a2 if a2 else 0.5, a3 if a3 else 0.5)
+    # frac = (0.6, 0.5, 0.5)
+
+    a1 = 0.5 if pt_ups1 < 10 else 0.6
+    if pt_ups1 < 8:
+        a2 = a3 = 0.4
+    elif pt_ups1 < 22:
+        a2 = a3 = 0.5
+    else:
+        a2 = a3 = 0.6
+
+    result = [a1, a2, a3]
+    return result
+
 
 
 cfg = utils.json("configs/chib1s.json")
@@ -68,28 +93,19 @@ cut["pt_ups"] = bin
 cut["dmplusm1s"] = [cfg["binning_default"][0], cfg["binning_default"][1]]
 nbins = cfg["binning_default"][2]
 
-if pt_ups1 < 12:
+if pt_ups1 < 8:
     order = 5
-elif pt_ups1 < 14:
-    order = 3
+elif pt_ups1 < 12:
+    order = 4
 else:
     order = 2
 # order=2
 print t.yellow("Polynom order: "), order
 
-default_frac = 0.5
-
-a1 = db.alphab1(bin, 1)
-a2 = db.alphab1(bin, 2)
-a3 = db.alphab1(bin, 3)
-if not (a1 or a2 or a3):
-    print t.red("No b1 fraction informaition for the bin")
-frac = (a1 if a1 else 0.6, a2 if a2 else 0.5, a3 if a3 else 0.5)
-# frac = (0.6, 0.5, 0.5)
+frac = _lambda(pt_ups1)
 print t.yellow("current b1 fractions: "), str(frac)
 
-
-sfracs = _sfracs(cut["pt_ups"])
+sfracs = _sfracs(bin)
 if sfracs:
     print t.yellow("MC sigma[chi_b1(1P)]: "), sfracs[0]
     print t.yellow("MC sigma[chi_b1(2P)]/sigma[chi_b1(1P)]: "), sfracs[1]
@@ -123,13 +139,9 @@ model = ChibModel(canvas=canvas,
                   sfracs=sfracs,
                   has_3p=has_3p)
 
-# if cut["dmplusm1s"][0] >= 0.6:
-#     model.n1p.fix(0)
-#     model.chib1p.mean1.setConstant(True)
-#     model.chib1p.sigma1.setConstant(True)
 
-if "fixed_means" in cfg:
-    model.chib1p.mean1.fix(cfg["fixed_means"])
+if "fixed_mean" in cfg:
+    model.chib1p.mean1.fix(cfg["fixed_mean"])
 
 
 f = fit.Fit(model=model,

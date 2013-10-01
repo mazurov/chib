@@ -41,14 +41,14 @@ class UpsModel (AbstractModel):
     def __init__(self, canvas, m1, m2, nbins=175, user_labels=None,
                  is_pull=True):
         super(UpsModel, self).__init__(canvas=canvas, x0=m1,
-                                       x1=m2, xfield="m", nbins=nbins,
+                                       x1=m2, xfield="m_dtf", nbins=nbins,
                                        user_labels=user_labels,
                                        is_pull=is_pull)
         name = "Y"
-        m_y1s = 9.4647e+00
+        m_y1s = pdg.UPS1S.value()
         s_y1s = 4.3679e-02
-        dm_y2s = 10.023 - m_y1s
-        dm_y3s = 10.355 - m_y1s
+        dm_y2s = pdg.UPS2S.value() - m_y1s
+        dm_y3s = pdg.UPS3S.value() - m_y1s
 
         self.m1s = ROOT.RooRealVar("m1s", "mean(%s)" % name, m_y1s,
                                    m_y1s - 0.3 * s_y1s, m_y1s + 0.3 * s_y1s)
@@ -89,7 +89,7 @@ class UpsModel (AbstractModel):
                                     dm_y2s,
                                     dm_y2s - 0.008,
                                     dm_y2s + 0.008)
-
+        self.dm2s.setConstant(True)
         self.aset11 = ROOT.RooArgList(self.m1s, self.dm2s)
         self.m2s = ROOT.RooFormulaVar("m2s",
                                       "m2s(%s)" % name,
@@ -114,7 +114,7 @@ class UpsModel (AbstractModel):
                                     dm_y3s,
                                     dm_y3s - 0.009,
                                     dm_y3s + 0.009)
-
+        self.dm3s.setConstant(True)
         self.aset21 = ROOT.RooArgList(self.m1s, self.dm3s)
         self.m3s = ROOT.RooFormulaVar("m3s",
                                       "m3s(%s)" % name,

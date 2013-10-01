@@ -16,19 +16,24 @@ t = Terminal()
 db = db.DB()
 
 
-def save(fit):
+def save(fit, suffix="fix"):
     bin = tuple(fit.cut["pt_ups"])
-    db = shelve.open('data/chib3s.db')
+    dbname = "chib3s" + ("_" + suffix if suffix else "")
+    db = shelve.open('data/%s.db' % dbname)
+
     year = db.get(fit.year, {})
     year[bin] = fit.model.params()
     db[fit.year] = year
+    print db[fit.year]
     db.close()
+
+    figname = fit.year + ("_" + suffix if suffix else "")
     canvas.SaveAs("figs/data/fits3s/f%s_%d_%s.pdf" %
-                  (fit.year, bin[0], str(bin[1])))
+                  (figname, bin[0], str(bin[1])))
 
 
 def _sfracs(bin):
-    db = shelve.open("data/mc_3s.db", "r")
+    db = shelve.open("data/mc_3s_prob.db", "r")
     tbin = tuple(bin)
     if tbin in db["fits"]:
         db_fits = db["fits"][tuple(tbin)]
@@ -46,7 +51,7 @@ cut = cfg["cut"]
 bin = (pt_ups1, pt_ups2)
 cut["pt_ups"] = bin
 
-cut["dm"] = [cfg["binning_default"][0], cfg["binning_default"][1]]
+cut["dmplusm3s"] = [cfg["binning_default"][0], cfg["binning_default"][1]]
 nbins = cfg["binning_default"][2]
 
 default_frac = 0.5
@@ -78,19 +83,19 @@ canvas.SetTitle("%d-%s %s" % (pt_ups1, pt_ups2, year))
 # Width from database
 # mc_width = []
 model = ChibModel(canvas=canvas,
-                  dm_begin=cut["dm"][0],
-                  dm_end=cut["dm"][1],
+                  dm_begin=cut["dmplusm3s"][0],
+                  dm_end=cut["dmplusm3s"][1],
                   nbins=nbins,
                   bgorder=2,
                   frac=frac,
-                  sigma=None,
+                  sigma=sigma,
                   has_3p=True)
 # model.chib3p.frac.setConstant(False)
 
 f = fit.Fit(model=model,
             tuples=tuples,
             cut=cut,
-            field="dm",
+            field="dmplusm3s",
             is_unbinned=cfg["is_unbinned"],
             nbins=nbins,
             has_splot=cfg["has_splot"])

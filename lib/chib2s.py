@@ -46,11 +46,11 @@ class Background(object):
 class Chib2P(object):
 
     def __init__(self, dm, frac, sigma=None):
-        dm_pdg = pdg.DM2S[2].value()
-        self.mean1 = ROOT.RooRealVar("mean_b1_2p", "mean_b1_2p", dm_pdg,
-                                     dm_pdg - 0.1, dm_pdg + 0.1)
+        m_pdg = pdg.CHIB12P.value()
+        self.mean1 = ROOT.RooRealVar("mean_b1_2p", "mean_b1_2p", m_pdg,
+                                     m_pdg - 0.1, m_pdg + 0.1)
 
-        diff = pdg.DM2S[3].value() - pdg.DM2S[2].value()
+        diff = pdg.CHIB22P.value() - pdg.CHIB12P.value()
         self.dmb2b1 = ROOT.RooRealVar("dmb2b1_2p", "dmb2b1_2p", diff)
         self.dmb2b1.setConstant(True)
 
@@ -96,12 +96,19 @@ class Chib2P(object):
 
 class Chib3P(object):
 
-    def __init__(self, dm, sigma2, sfrac, frac):
-        dm_pdg = pdg.DM2S[4].value()
-        self.mean1 = ROOT.RooRealVar("mean_b1_3p", "mean_b1_3p", dm_pdg,
-                                     dm_pdg - 0.1, dm_pdg + 0.1)
+    def __init__(self, dm, mean_2p, sigma2, sfrac, frac):
+        diff = pdg.CHIB13P - pdg.CHIB12P
+        self.dm1p = ROOT.RooRealVar("dm_b13p_b11p", "dm_b13p_b11p",
+                                    diff, diff - 0.1, diff + 0.1)
+        self.dm1p.setConstant(True)
 
-        diff = pdg.DM2S[5].value() - pdg.DM2S[4].value()
+        alist = ROOT.RooArgList(mean_2p, self.dm1p)
+        self.mean1 = ROOT.RooFormulaVar("mean_b1_3p", "mean_b1_3p",
+                                        "%s+%s" %
+                                        (mean_2p.GetName(),
+                                         self.dm1p.GetName()), alist)
+
+        diff = pdg.CHIB23P.value() - pdg.CHIB13P.value()
         self.dmb2b1 = ROOT.RooRealVar("dmb2b1_3p", "dmb2b1_3p", diff)
         self.dmb2b1.setConstant(True)
 
@@ -158,7 +165,7 @@ class ChibModel(AbstractModel):
         self, canvas, dm_begin, dm_end, frac=(0.5, 0.5, 0.5), nbins=85,
             bgorder=5, sfracs=None, user_labels=None, has_3p=True):
         super(ChibModel, self).__init__(canvas=canvas, x0=dm_begin,
-                                        x1=dm_end, xfield="dm", nbins=nbins,
+                                        x1=dm_end, xfield="dmplusm2s", nbins=nbins,
                                         user_labels=user_labels)
 
         if sfracs:
@@ -170,6 +177,7 @@ class ChibModel(AbstractModel):
                              sigma=sigma2,
                              frac=frac[1])
         self.chib3p = Chib3P(dm=self.x,
+                             mean_2p=self.chib2p.mean1,
                              sigma2=self.chib2p.sigma,
                              sfrac=sfrac3,
                              frac=frac[2])

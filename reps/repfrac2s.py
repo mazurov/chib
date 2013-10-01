@@ -3,7 +3,7 @@
 """ Summary table for fraction determination """
 # ============================================================================
 # ============================================================================
-BINNING = [(18, 22), (22, 30)]
+BINNING = [(18, 25), (25, 40)]
 # ============================================================================
 import ROOT
 from AnalysisPython.PyRoUts import VE
@@ -26,7 +26,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
                              file_extension="tex")
 # ============================================================================
 # Extract efficencies
-db = db.DB(chib="chib2s", mc="mc_2s", iups=2)
+db = db.DB(chib="chib2s_mfix", mc="mc_2s_prob", iups=2)
 # ============================================================================
 alignment = "c" * (len(BINNING))
 # ============================================================================
@@ -85,6 +85,6 @@ for ip in range(2):
                         year], marker=markers[year], values=values)
         graphs.append(g)
 
-    mg = graph.MultiGraph(graphs=graphs)
+    mg = graph.MultiGraph(graphs=graphs, ymin=0)
     mg.draw()
     mg.canvas.SaveAs("figs/frac/cb%d_frac_2s.pdf" % (ip+2))

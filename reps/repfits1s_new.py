@@ -6,7 +6,7 @@ from AnalysisPython.PyRoUts import VE
 BINNINGS = [[(6, 8), (8, 10), (10, 12), (12, 14)],[(14, 18), (18, 22), (22, 30),
            (18, 30)]]
 # BINNINGS = [[(6, 8), (8, 10)]]
-# BINNINGS = [[(14, None)]]
+BINNINGS = [[(14, None)]]
 
 # ============================================================================
 import types
@@ -48,7 +48,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
 
 
 # ============================================================================
-db = db.DB(chib="chib1s_fix", ups="ups_fixcb1")
+db = db.DB(chib="chib1s_fix")
 # ============================================================================
 print renderer.render_name("fits1s-head", {})
 for BINNING in BINNINGS:
@@ -58,7 +58,7 @@ for BINNING in BINNINGS:
     bins = ""
     for bin in BINNING:
         bins += " & & \multicolumn{2}{c}{%s}" % (
-                "$%s < p_T(\Y1S) < %s \gevc$" % bin if bin[1] else "$p_T(\Upsilon)> %d \gevc$" % bin[0]
+                "$%s < p_T(\Upsilon) < %s \gevc$" % bin if bin[1] else "$p_T(\Upsilon)> %d \gevc$" % bin[0]
             )
     years = ""
     lines = ""
@@ -164,7 +164,7 @@ for BINNING in BINNINGS:
         for iphi in range(5):
             context["phi%d" % iphi] = phi[iphi]
 
-    print ("\subtable[$%d < p_T(\Y1S) < %d \gevcc$]{" % (BINNING[0][0], BINNING[-1][1]) if len(BINNINGS) > 1 else "")
+    print ("\subtable[]{" if len(BINNINGS) > 1 else "")
     print renderer.render_name("fits1s", context)
     print ("}" if len(BINNINGS) > 1 else "")
 
