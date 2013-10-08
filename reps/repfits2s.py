@@ -4,8 +4,8 @@
 # ============================================================================
 from AnalysisPython.PyRoUts import VE
 # ============================================================================
-# BINNING = [(18, 22), (22, 40)]
-BINNING = [(18, None)]
+BINNING = [(18, 25), (25, 40)]
+# BINNING = [(18, None)]
 # ============================================================================
 from lib import utils
 from lib import pdg
@@ -26,7 +26,7 @@ alignment = "rrr" * (len(BINNING))
 bins = ""
 for bin in BINNING:
     bins += " & & \multicolumn{2}{c}{%s}" % (
-            "$%s < p_T(\Y2S) < %s \gevc$" % bin if bin[1] else "$p_T(\Y2S)> %d \gevc$" % bin[0]
+            "%s --- %s" % bin if bin[1] else "$p_T > %d \gevc$" % bin[0]
     )
 years = ""
 lines = ""

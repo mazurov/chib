@@ -22,7 +22,7 @@ for p in range(1, 4):
             #== configure Bender
             application=Bender(
                 events=-1,
-                version='v22r6',
+                version='v22r8',
                 module=my_area + my_opts,
                 user_release_area=my_area,
                 params={"nb": b, "np": p},

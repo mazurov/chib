@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 import AnalysisPython.PyRoUts as RU
-
+import os
+import os.path
 import re
 import simplejson
+import shelve
+
+from ext.blessings import Terminal
+t = Terminal()
 
 from IPython import embed as shell  # noqa
 
@@ -187,3 +192,66 @@ def frac(year, db_chib, db_ups, db_mc, bin, np, ns=1):
     n_ups = RU.VE(str(db_ups[year][bin]["N%dS" % ns]))
     e = eff(db_mc=db_mc, bin=bin, np=np)
     return (n_chib / e) / n_ups
+
+
+def savefit(fit, canvas, name):
+    bin = tuple(fit.cut["pt_ups"])
+    dbname = 'data/%s.db' % name
+
+    db = shelve.open(dbname)
+
+    year = db.get(fit.year, {})
+    year[bin] = fit.model.params()
+    db[fit.year] = year
+    print t.yellow(str(db[fit.year]))
+    print "DB:", t.green(dbname)
+    db.close()
+
+    path = "figs/data/fits/%s" % name
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    fig = "%s/f%s_%d_%s.pdf" % (path, fit.year, bin[0], str(bin[1]))
+    canvas.SaveAs(fig)
+
+def savefit(fit, canvas, name):
+    bin = tuple(fit.cut["pt_ups"])
+    dbname = 'data/%s.db' % name
+
+    db = shelve.open(dbname)
+
+    year = db.get(fit.year, {})
+    year[bin] = fit.model.params()
+    db[fit.year] = year
+    print t.yellow(str(db[fit.year]))
+    print "DB:", t.green(dbname)
+    db.close()
+
+    path = "figs/data/fits/%s" % name
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    fig = "%s/f%s_%d_%s.pdf" % (path, fit.year, bin[0], str(bin[1]))
+    canvas.SaveAs(fig)
+
+def savemcfit(result, canvas, name, image):
+    db_name = 'data/%s.db' % name
+    db = shelve.open(db_name)
+
+    fits = db.get("fits", {})
+
+    fits.update(dict(result))
+
+    db["fits"] = fits
+    db.close()
+
+    path = "figs/mc/fits/%s" % name
+
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    canvas.SaveAs("%s/%s" % (path, image))
+
+    print "Database: ", t.green(db_name)
+
+

@@ -2,7 +2,7 @@ import ROOT
 from lib import utils
 from IPython import embed as shell  # noqa
 import re
-NUMCPU = 2
+NUMCPU = 4
 
 
 class AbstractModel(object):

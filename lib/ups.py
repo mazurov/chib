@@ -25,9 +25,14 @@ class UpsBackground(object):
 
         # self.pdf = ROOT.RooExponential("exp_%s" % name, "exp(%s)" % name,
         #                                mass, self.tau)
-        self.pdf = cpp.Analysis.Models.ExpoPositive(
+
+        # self.pdf = cpp.Analysis.Models.ExpoPositive(
+        #     "exp_bg", "exp_bg",
+        #     mass, self.tau, self.alist, 8.5, 12)
+
+        self.pdf = ROOT.RooExponential(
             "exp_bg", "exp_bg",
-            mass, self.tau, self.alist, 8.5, 12)
+            mass, self.tau)
 
         # self.pdf = cpp.Analysis.Models.PolyPositive(
         #     "poly_bg", "poly_bg",

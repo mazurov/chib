@@ -45,12 +45,14 @@ def output(year, fit, key, scale=1, digits=2, var=False):
 
     if key in fit:
         v = fit[key]
+        if key == "exp_tau":
+            shell()
         if var or isinstance(v, types.TupleType):
             result += utils.latex_ve(VE(str(v)) * scale)
         elif year == "2011":
             result += mulicolumn(v*scale, digits)
         else:
-            return ""
+            result += str(v)
     else:
         result += " - "
     return result

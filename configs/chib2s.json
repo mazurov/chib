@@ -1,11 +1,15 @@
 {
-    "tuples2011": "data/chib2011_v1.root",
-    "tuples2012": "data/chib2012_v1.root",
+    "tuples2011": "data/chib2011_v4.root",
+    "tuples2012": "data/chib2012_v4.root",
+    "name": "chib2s_min3p",
     "is_unbinned": true,
-    "has_splot": true,
+    "has_splot": false,
 
     "binning_default" : [10.17, 11.03, 43],
     "fixed_mean": 10.249,
+    "fixed_mean_3p": 10.503,
+    "_lambda": 0.5,
+
     "cut": {
         "mups_dtf": [9.870, 10.090]
         , "pt_ups": [18, null]

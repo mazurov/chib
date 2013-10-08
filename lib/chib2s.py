@@ -98,15 +98,15 @@ class Chib3P(object):
 
     def __init__(self, dm, mean_2p, sigma2, sfrac, frac):
         diff = pdg.CHIB13P - pdg.CHIB12P
-        self.dm1p = ROOT.RooRealVar("dm_b13p_b11p", "dm_b13p_b11p",
+        self.dm2p = ROOT.RooRealVar("dm_b13p_b12p", "dm_b13p_b12p",
                                     diff, diff - 0.1, diff + 0.1)
-        self.dm1p.setConstant(True)
+        self.dm2p.setConstant(True)
 
-        alist = ROOT.RooArgList(mean_2p, self.dm1p)
+        alist = ROOT.RooArgList(mean_2p, self.dm2p)
         self.mean1 = ROOT.RooFormulaVar("mean_b1_3p", "mean_b1_3p",
                                         "%s+%s" %
                                         (mean_2p.GetName(),
-                                         self.dm1p.GetName()), alist)
+                                         self.dm2p.GetName()), alist)
 
         diff = pdg.CHIB23P.value() - pdg.CHIB13P.value()
         self.dmb2b1 = ROOT.RooRealVar("dmb2b1_3p", "dmb2b1_3p", diff)
@@ -165,7 +165,8 @@ class ChibModel(AbstractModel):
         self, canvas, dm_begin, dm_end, frac=(0.5, 0.5, 0.5), nbins=85,
             bgorder=5, sfracs=None, user_labels=None, has_3p=True):
         super(ChibModel, self).__init__(canvas=canvas, x0=dm_begin,
-                                        x1=dm_end, xfield="dmplusm2s", nbins=nbins,
+                                        x1=dm_end, xfield="dmplusm2s",
+                                        nbins=nbins,
                                         user_labels=user_labels)
 
         if sfracs:

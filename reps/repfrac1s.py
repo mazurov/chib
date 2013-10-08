@@ -28,7 +28,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
                              file_extension="tex")
 # ============================================================================
 # Extract efficencies
-db = db.DB(chib="chib1s_mfix", mc="mc_1s_prob", iups=1)
+db = db.DB(chib="chib1s_tr", mc="mc_1s_tr", iups=1)
 # ============================================================================
 alignment = "c" * (len(BINNING))
 # ============================================================================
@@ -76,7 +76,7 @@ for year in ["2011", "2012"]:
         context["e%d" % (ip + 1)] = eff[ip]
         context["f%d" % (ip + 1)] = frac[ip]
     context["u1s"] = u1s
-    print renderer.render_name("frac", context)
+    print renderer.render_name("frac1s", context)
 # ============================================================================
 colors = {"2011": ROOT.kBlue, "2012": ROOT.kRed}
 markers = {"2011": ROOT.kFullSquare, "2012": ROOT.kOpenCircle}
@@ -100,7 +100,9 @@ for ip in range(3):
                 nfrac = db.frac(year, bin, ip + 1, 1)
                 values.append((bin, nfrac*100))
         g = graph.Graph(color=colors[
-                        year], marker=markers[year], values=values)
+                        year], marker=markers[year],
+                        values=values,
+                        space=2)
         graphs.append(g)
 
     mg = graph.MultiGraph(graphs=graphs, ymin=0)

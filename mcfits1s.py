@@ -4,6 +4,7 @@ canvas = ROOT.TCanvas("c1", "c1", 1024, 768)
 
 import types
 import sys
+import os.path
 from lib import utils
 from lib import fit
 from lib.chibmc import ChibMCModel
@@ -31,8 +32,9 @@ def user_labels(pt_ups1, pt_ups2):
 
 # mc_mass - pt_g > 1.3
 
-def save(result):
-    db = shelve.open('data/mc_1s_prob.db')
+
+def save(result, name):
+    db = shelve.open('data/%s.db' % name)
     fits = db.get("fits", {})
 
     fits.update(dict(result))
@@ -41,39 +43,38 @@ def save(result):
     db.close()
 
 
-def graphs(result):
-    values1 = defaultdict(list)
-    values2 = defaultdict(list)
-    for bin, v in sorted(result.items()):
-        for k in ["sigma", "ar", "nr", "al", "nl"]:
-            if k not in result[bin]["chib13p"]:
-                continue
-            val = result[bin]["chib13p"][k]
-            if isinstance(val, types.TupleType):
-                values1[k].append((bin, VE(val[0], val[1]**2)))
-            val = result[bin]["chib23p"][k]
-            if isinstance(val, types.TupleType):
-                values2[k].append((bin, VE(val[0], val[1]**2)))
+# def graphs(result):
+#     values1 = defaultdict(list)
+#     values2 = defaultdict(list)
+#     for bin, v in sorted(result.items()):
+#         for k in ["sigma", "ar", "nr", "al", "nl"]:
+#             if k not in result[bin]["chib13p"]:
+#                 continue
+#             val = result[bin]["chib13p"][k]
+#             if isinstance(val, tuple):
+#                 values1[k].append((bin, VE(val[0], val[1] ** 2)))
+#             val = result[bin]["chib23p"][k]
+#             if isinstance(val, tuple):
+#                 values2[k].append((bin, VE(val[0], val[1] ** 2)))
 
-    mgraphs = []
-    for k in values1:
-        graph1 = Graph("b1", ROOT.kBlue, values1[k])
-        graph2 = Graph("b2", ROOT.kRed, values2[k])
-        mg = MultiGraph(title=k, xtitle="bin", ytitle=k,
-                        graphs=[graph1, graph2], show_legend=False)
-        mg.draw("figs/mc/params/chib3p_%s.pdf" % k)
-        mgraphs.append(mg)
-    return mgraphs
+#     mgraphs = []
+#     for k in values1:
+#         graph1 = Graph("b1", ROOT.kBlue, values1[k])
+#         graph2 = Graph("b2", ROOT.kRed, values2[k])
+#         mg = MultiGraph(title=k, xtitle="bin", ytitle=k,
+#                         graphs=[graph1, graph2], show_legend=False)
+#         mg.draw("figs/mc/params/chib3p_%s.pdf" % k)
+#         mgraphs.append(mg)
+#     return mgraphs
 
 
 cfg = utils.json("configs/mcfits1s.json")
 
-binning = [(6,   8), (8, 10), (10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30), (14, None)]
-# binning = [(10, 12), (12, 14), (14, 18), (18,30), (18, 22), (22, 30)]
-# binning = [(6, 8)]
-# binning = [(22, 30)]
-# binning = [(6, 8), (8,10)]
-# binning = [(6, 8)]
+binning = [(6, 8), (8, 10), (10, 12), (12, 14), (14, 18), (18, 30), (18, 22),
+           (22, 30), (14, None)]
+
+# binning = [(18,30)]
+
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])
@@ -120,24 +121,18 @@ for p in range(1, 4):
                         nbins=nbins
                         )
             db_key = "cb%d%d" % (b, p)
-            image_name = "%s_%d_%s" % (db_key, bin[0], str(bin[1]))
             f.process()
             # shell()
             is_good = f.run()
             print f.model
             if not is_good:
                 print t.red("Bad fit:"), name
-                shell();
-            # if not f.process():
-            #     is_good = False
-            #     for i in range(10):
-            #         is_good = f.run()
-            #         if is_good:
-            #             break
-            #     if not is_good:
-            #         print t.red("Bad fit:"), name
-            #         shell()
+                shell()
 
             result[bin][db_key] = model.params()
-            model.save_image("figs/mc/fits/%s.pdf" % image_name)
+
+            # model.save_image("figs/mc/fits/%s.pdf" % image_name)
+            image_name = "%s_%d_%s.pdf" % (db_key, bin[0], str(bin[1]))
+            utils.savemcfit(result, model.canvas, cfg["name"], image_name)
+
 print result

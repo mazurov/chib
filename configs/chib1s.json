@@ -1,10 +1,10 @@
 {
-    "tuples2011_old": "castor:///castor/cern.ch/user/a/amazurov/data/chib2011rec14s20r1_v4.root",
-    "tuples2012_old": "castor:///castor/cern.ch/user/a/amazurov/data/chib2012rec14s20_v4.root",
-    "tuples2011": "data/chib2011_v1.root",
-    "tuples2012": "data/chib2012_v1.root",
+    "tuples2011": "data/chib2011_v4.root",
+    "tuples2012": "data/chib2012_v4.root",
     "is_unbinned": true,
     "has_splot": false,
+    "name": "chib1s_tr",
+    "_lambda": 0,
 
     "binning_default" : [9.77, 10.89, 56],
     "binning_default0" : [0.31, 1.43, 56],
@@ -14,6 +14,7 @@
 
     "chib3p_min_pt_ups": 10,
     "fixed_mean": 9.892,
+    "fixed_mean_3p": 10.507,
 
     "cut": {
          "mups_dtf": [9.310, 9.600]

@@ -23,7 +23,7 @@ renderer = pystache.Renderer(escape=lambda u: u, search_dirs=["reps/tmpl"],
                              file_extension="tex")
 # ============================================================================
 # Extract efficencies
-db = db.DB(mc="mc_1s")
+db = db.DB(mc="mc_1s_tr")
 # ============================================================================
 alignment = "c" * (len(BINNING))
 # ============================================================================
@@ -65,4 +65,4 @@ for ip in range(3):
     context["a"] = a[0]
     context["n"] = n[0]
 
-    print renderer.render_name("mcfit", context)
+    print renderer.render_name("mcfit1s", context)

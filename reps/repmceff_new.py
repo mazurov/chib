@@ -12,13 +12,13 @@ if NS == 1:
 
 if NS == 2:
     NP = 2
-    BINNING = [(18, 22), (22, 40)]
+    BINNING = [(18, 25), (25, 40)]
 
 if NS == 3:
     NP = 3
     BINNING = [(27, 40)]
 
-db = DB(mc="mc_%ds_prob" % NS)
+db = DB(mc="mc_%ds_tr" % NS)
 renderer = tmpl.renderer()
 
 prefix = " & "

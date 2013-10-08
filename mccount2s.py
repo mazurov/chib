@@ -11,7 +11,7 @@ from collections import defaultdict
 
 
 def save(result):
-    db = shelve.open('data/mc_2s_prob.db')
+    db = shelve.open('data/mc_2s_tr.db')
     count = db.get("u2s", {})
 
     count.update(dict(result))

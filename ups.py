@@ -12,7 +12,7 @@ from ext.blessings import Terminal
 t = Terminal()
 
 
-def save(fit, suffix="dtf"):
+def save(fit, suffix="fixdtf"):
     bin = tuple(fit.cut["pt_ups"])
     db = shelve.open('data/ups_%s.db' % suffix)
     year = db.get(fit.year, {})

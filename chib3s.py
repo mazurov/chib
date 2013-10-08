@@ -16,7 +16,7 @@ t = Terminal()
 db = db.DB()
 
 
-def save(fit, suffix="fix"):
+def save(fit, suffix="tr"):
     bin = tuple(fit.cut["pt_ups"])
     dbname = "chib3s" + ("_" + suffix if suffix else "")
     db = shelve.open('data/%s.db' % dbname)

@@ -30,14 +30,14 @@ def _initialize(self):
 
     lines = {}
     lines['Ups'] = {}
-    lines['Ups']['L0TOS'] = 'L0DiMuon.*Decision'
-    lines['Ups'][
-        'L0TIS'] = 'L0(Hadron|Muon|DiMuon|Photon|Electron)Decision'
-    lines['Ups']['Hlt1TOS'] = 'Hlt1DiMuonHighMass.*Decision'
+    lines['Ups']['L0TIS'] = 'L0(Hadron|Muon|DiMuon|Photon|Electron)Decision'
     lines['Ups']['Hlt1TIS'] = 'Hlt1TrackAll.*Decision'
-    lines['Ups']['Hlt2TOS'] = 'Hlt2(DiMuon|SingleMuonHighPT).*Decision'
     lines['Ups']['Hlt2TIS'] = ('Hlt2(Charm|Topo|Single|Express|Inc|Tri).'
                                '*Decision')
+
+    lines['Ups']['L0TOS'] = 'L0DiMuon.*Decision'
+    lines['Ups']['Hlt1TOS'] = 'Hlt1DiMuonHighMass.*Decision'
+    lines['Ups']['Hlt2TOS'] = 'Hlt2DiMuonB.*Decision'
 
     sc = self.tisTos_initialize(triggers, lines)
     if sc.isFailure():
@@ -127,9 +127,12 @@ class ChibMC(AlgoMC):
         tup = self.nTuple('Chib')
 
         chi2_dtf = DTF_CHI2NDOF(True)
-        deltaM = DTF_FUN(M - M1, True)
 
-        mups = DTF_FUN(M, True)
+        deltaM = M - M1
+        deltaM_dtf = DTF_FUN(M - M1, True)
+
+        mups_dtf = DTF_FUN(M1, True)
+
         minDLLmu = MINTREE(ISBASIC, PIDmu - PIDpi)
         kullback = MINTREE(ISBASIC & HASTRACK, CLONEDIST)
 
@@ -141,8 +144,12 @@ class ChibMC(AlgoMC):
 
         for chib in chibs:
             # delta mass
-            dm = (M12(chib) - M1(chib)) / GeV
-            if dm > 2:
+            dm_dtf = deltaM_dtf(chib) / GeV
+            if dm_dtf > 2:
+                continue
+
+            m_dtf = mups_dtf(chib) / GeV
+            if not 8.5 < m_dtf < 12:
                 continue
 
             ups = chib(1)
@@ -169,8 +176,9 @@ class ChibMC(AlgoMC):
 
             probnn_mu1 = PROBNNmu(mu1)
             probnn_mu2 = PROBNNmu(mu2)
+            minprob = min(probnn_mu1, probnn_mu2)
 
-            if min(probnn_mu1, probnn_mu2) < 0.4:
+            if minprob < 0.5:
                 continue
 
             y_ups = Y(ups)
@@ -189,12 +197,15 @@ class ChibMC(AlgoMC):
             if dll_min < 0:
                 continue
 
-            tup.column('dm', dm)
-            tup.column('dmplusm1s', dm+9.46030)
-            tup.column('dmplusm2s', dm+10.02326)
-            tup.column('dmplusm3s', dm+10.3552)
+            tup.column('dm', deltaM(chib) / GeV)
+            tup.column('dm_dtf', dm_dtf)
+            tup.column('mups_dtf', m_dtf)
 
-            tup.column('m', M1(chib) / GeV)
+            tup.column('dmplusm1s', dm_dtf + 9.46030)
+            tup.column('dmplusm2s', dm_dtf + 10.02326)
+            tup.column('dmplusm3s', dm_dtf + 10.3552)
+
+            # tup.column('m', M1(chib) / GeV)
             tup.column('pt_ups', pt_ups)
             tup.column('pt_g', pt_g)
             tup.column("y", y_ups)
@@ -207,19 +218,15 @@ class ChibMC(AlgoMC):
             tup.column("chi2_vx", VCHI2(ups.endVertex()))
             tup.column("lv01", lv01)
 
-            tup.column('mu_dtf', mups(ups) / GeV)
-            tup.column('m_dtf', mups(chib) / GeV)
-            tup.column('dm_dtf', deltaM(chib) / GeV)
-
             tup.column('pt_chib', PT(chib) / GeV)
 
-            tup.column('p_mu1', P(mu1) / GeV)
-            tup.column('p_mu2', P(mu2) / GeV)
-            tup.column('pt_mu1', PT(mu1) / GeV)
-            tup.column('pt_mu2', PT(mu2) / GeV)
+            min_p_mu = min(P(mu1), P(mu2))
+            tup.column('min_p_mu', min_p_mu / GeV)
 
-            tup.column('probnn_mu1', probnn_mu1)
-            tup.column('probnn_mu2', probnn_mu1)
+            min_pt_mu = min(PT(mu1), PT(mu2))
+            tup.column('min_pt_mu', min_pt_mu / GeV)
+
+            tup.column('minprob', minprob)
 
 
             tup.column('dm_1s', dm_1s(ups) / GeV)
@@ -341,7 +348,9 @@ class UpsilonMC(AlgoMC):
         tup = self.nTuple('Upsilon')
 
         chi2_dtf = DTF_CHI2NDOF(True)
-        mups = DTF_FUN(M, True)
+
+        mups_dtf = DTF_FUN(M, True)
+
         minDLLmu = MINTREE(ISBASIC, PIDmu - PIDpi)
         kullback = MINTREE(ISBASIC & HASTRACK, CLONEDIST)
 
@@ -351,8 +360,9 @@ class UpsilonMC(AlgoMC):
 
         matched_count = 0
         for ups in upsilons:
-            m = M(ups) / GeV
-            if not 8.5 < m < 12:
+
+            m_dtf = mups_dtf(ups) / GeV
+            if not 8.5 < m_dtf < 12:
                 continue
 
             pt_ups = PT(ups) / GeV
@@ -373,25 +383,27 @@ class UpsilonMC(AlgoMC):
 
             probnn_mu1 = PROBNNmu(mu1)
             probnn_mu2 = PROBNNmu(mu2)
-            if min(probnn_mu1, probnn_mu2) < 0.4:
+            minprob = min(probnn_mu1, probnn_mu2)
+
+            if minprob < 0.5:
                 continue
 
-            # tup.column ( 'dm'     , dm           / GeV )
-            tup.column('m', m)
+            tup.column('m',  M(ups) / GeV)
+            tup.column('m_dtf',  m_dtf)
+
             tup.column('pt_ups', pt_ups)
             tup.column('c2_dtf', c2_dtf)
             tup.column("y", y_ups)
             tup.column('dll_min', minDLLmu(ups))
 
-            tup.column('m_dtf', mups(ups) / GeV)
-            tup.column('p_mu1', P(mu1) / GeV)
-            tup.column('p_mu2', P(mu2) / GeV)
-            tup.column('pt_mu1', PT(mu1) / GeV)
-            tup.column('pt_mu2', PT(mu2) / GeV)
 
-            tup.column('probnn_mu1', PROBNNmu(mu1))
-            tup.column('probnn_mu2', PROBNNmu(mu2))
+            min_p_mu = min(P(mu1), P(mu2))
+            tup.column('min_p_mu', min_p_mu / GeV)
 
+            min_pt_mu = min(PT(mu1), PT(mu2))
+            tup.column('min_pt_mu', min_pt_mu / GeV)
+
+            tup.column('minprob', minprob)
 
             tup.column('dm_1s', dm_1s(ups) / GeV)
             tup.column('dm_2s', dm_2s(ups) / GeV)

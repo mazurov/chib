@@ -19,7 +19,7 @@ from collections import defaultdict
 
 
 def save(result):
-    db = shelve.open('data/mc_3s_prob.db')
+    db = shelve.open('data/mc_3s_tr.db')
     fits = db.get("fits", {})
     for b in result.keys():
         bn = fits.get(b, {})
@@ -36,7 +36,7 @@ def save(result):
 cfg = utils.json("configs/mcfits3s.json")
 
 # binning = [(18, None), (18, 22), (22, 30)]
-binning = [(27, None)]
+binning = [(27, None), (27, 40)]
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])
@@ -84,7 +84,6 @@ for b in range(1, 3):
                     nbins=nbins
                     )
         db_key = "cb%d%d" % (b, p)
-        image_name = "%s_%d_%s" % (db_key, bin[0], str(bin[1]))
         f.process()
         # shell()
         is_good = f.run()
@@ -94,5 +93,7 @@ for b in range(1, 3):
             shell()
         shell()
         result[bin][db_key] = model.params()
-        model.save_image("figs/mc/fits3s/%s.pdf" % image_name)
+
+        image_name = "%s_%d_%s.pdf" % (db_key, bin[0], str(bin[1]))
+        utils.savemcfit(result, model.canvas, cfg["name"], image_name)
 print result

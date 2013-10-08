@@ -14,35 +14,6 @@ t = Terminal()
 
 db = db.DB(mc="mc_1s")
 
-
-def user_labels(pt_ups1, pt_ups2):
-    def _user_labels(self):
-        if pt_ups2 is not None:
-            txt = "%d < p_{T}^{#Upsilon(1S)} < %d GeV/c" % (pt_ups1, pt_ups2)
-        else:
-            txt = "p_{T}^{#Upsilon(1S)} > %d GeV/c" % pt_ups1
-        self.user_label = ROOT.TLatex(0.62, 0.75, txt)
-        self.user_label.SetNDC()
-        self.user_label.Draw()
-    return _user_labels
-
-
-def save(fit, suffix="mfix"):
-    bin = tuple(fit.cut["pt_ups"])
-    dbname = "chib1s" + ("_" + suffix if suffix else "")
-    db = shelve.open('data/%s.db' % dbname)
-
-    year = db.get(fit.year, {})
-    year[bin] = fit.model.params()
-    db[fit.year] = year
-    print db[fit.year]
-    db.close()
-
-    figname = fit.year + ("_" + suffix if suffix else "")
-    canvas.SaveAs("figs/data/fits/f%s_%d_%s.pdf" %
-                  (figname, bin[0], str(bin[1])))
-
-
 def _sfracs(bin):
     db = shelve.open("data/mc_1s.db", "r")
     tbin = tuple(bin)
@@ -78,9 +49,8 @@ def _lambda(pt_ups1):
     result = [a1, a2, a3]
     return result
 
-
-
 cfg = utils.json("configs/chib1s.json")
+name = cfg["name"]
 
 year = sys.argv[1]
 pt_ups1 = int(sys.argv[2])
@@ -102,7 +72,12 @@ else:
 # order=2
 print t.yellow("Polynom order: "), order
 
-frac = _lambda(pt_ups1)
+if "lambda" not in cfg:
+    frac = _lambda(pt_ups1)
+else:
+    l = cfg["lambda"]
+    frac = [l]*3
+
 print t.yellow("current b1 fractions: "), str(frac)
 
 sfracs = _sfracs(bin)
@@ -112,7 +87,14 @@ if sfracs:
     print t.yellow("MC sigma[chi_b1(3P)]/sigma[chi_b1(1P)]: "), sfracs[2]
 else:
     print t.red("No MC sigma informaition for the bin")
-# sfracs=None
+
+if "fixed_mean_3p" in cfg:
+    mean_3p = cfg["fixed_mean_3p"]
+else:
+    mean_3p = pdg.CHIB13P
+
+print t.yellow("Mass of chib(3P): "), mean_3p
+
 
 has_3p = True if pt_ups1 >= 12 else False
 if year == "2011" and pt_ups1 == 12 and pt_ups2 == 14:
@@ -129,7 +111,7 @@ else:
 canvas.SetTitle("%d-%s %s" % (pt_ups1, pt_ups2, year))
 
 # Width from database
-mc_width = []
+
 model = ChibModel(canvas=canvas,
                   dm_begin=cut["dmplusm1s"][0],
                   dm_end=cut["dmplusm1s"][1],
@@ -137,6 +119,7 @@ model = ChibModel(canvas=canvas,
                   bgorder=order,
                   frac=frac,
                   sfracs=sfracs,
+                  mean_3p=mean_3p,
                   has_3p=has_3p)
 
 
@@ -152,5 +135,10 @@ f = fit.Fit(model=model,
             nbins=nbins,
             has_splot=cfg["has_splot"])
 f.year = str(year)
-f.process()
+status = f.process()
+
 print f
+if status:
+    utils.savefit(f, canvas, name)
+else:
+    t.red("Bad fit")

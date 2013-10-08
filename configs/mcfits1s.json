@@ -1,18 +1,19 @@
 {
     "tuples1": "data/mc11a.root",
-    "tuples": "data/mc11a_v4.root",
+    "tuples": "data/mc11a_v5.root",
     "nbins": 85,
+    "name": "mc_1s_tr",
     "is_unbinned": true,
 
     "cut": {
         "dm": [0, 2]
-        , "m": [9.310, 9.600]
+        , "mups_dtf": [9.310, 9.600]
         , "pt_ups": [6, null]
         , "pt_g": [0.6, null]
         , "lv01": [0, null]
         , "c2_dtf": [0, 4]
         , "dll_min": [0, null]
-        , "min(probnn_mu1, probnn_mu2)": [0.5, null]
+        , "minprob": [0.5, null]
         , "y":[2, 4.5]
         , "true_cb_ups1s": 1
         , "true_cb_ups1s_y": 1
@@ -26,7 +27,7 @@
         , "dll_min": [0, null]
         , "y":[2, 4.5]
         , "true_y1s": 1
-        , "min(probnn_mu1, probnn_mu2)": [0.5, null]
+        , "minprob": [0.5, null]
         , "(Ups_l0tos & 2)": 2
         , "(Ups_l1tos & 2)": 2
         , "(Ups_l2tos & 2)": 2

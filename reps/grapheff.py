@@ -10,7 +10,7 @@ BINNINGS = {
 }
 
 for ns in range(1, 3):
-    db = DBMC("mc_%ds_prob" % ns)
+    db = DBMC("mc_%ds_tr" % ns)
     binning = BINNINGS[ns]
     graphs = []
     for np in range(ns, 4):

@@ -18,25 +18,24 @@ import shelve
 from collections import defaultdict
 
 
-def save(result):
-    db = shelve.open('data/mc_2s_prob.db')
-    fits = db.get("fits", {})
-    for b in result.keys():
-        bn = fits.get(b, {})
-        bn.update(result[b])
-        fits[b] = bn
-    # fits.update(dict(result))
+# def save(result):
+#     db = shelve.open('data/mc_2s_tr.db')
+#     fits = db.get("fits", {})
+#     for b in result.keys():
+#         bn = fits.get(b, {})
+#         bn.update(result[b])
+#         fits[b] = bn
+#     # fits.update(dict(result))
 
-    db["fits"] = fits
-    print db["fits"]
-    db.close()
-
+#     db["fits"] = fits
+#     print db["fits"]
+#     db.close()
 
 
 cfg = utils.json("configs/mcfits2s.json")
 
-# binning = [(18, None), (18, 22), (22, 30)]
-binning = [(18, None)]
+binning = [(18, None), (18, 25), (25, 40)]
+# binning = [(18, None)]
 
 tuples = ROOT.TChain("ChibAlg/Chib")
 tuples.Add(cfg["tuples"])
@@ -84,7 +83,6 @@ for ip in range(2):
                         nbins=nbins
                         )
             db_key = "cb%d%d" % (b, p)
-            image_name = "%s_%d_%s" % (db_key, bin[0], str(bin[1]))
             f.process()
             # shell()
             is_good = f.run()
@@ -93,5 +91,8 @@ for ip in range(2):
                 print t.red("Bad fit:"), name
                 shell()
             result[bin][db_key] = model.params()
-            model.save_image("figs/mc/fits2s/%s.pdf" % image_name)
+            # model.save_image("figs/mc/fits2s/%s.pdf" % image_name)
+
+            image_name = "%s_%d_%s.pdf" % (db_key, bin[0], str(bin[1]))
+            utils.savemcfit(result, model.canvas, cfg["name"], image_name)
 print result
